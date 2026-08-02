@@ -1,0 +1,86 @@
+{
+  "projectType": "frontend",
+  "projectName": "Dev Arcade",
+  "projectDescription": "A retro arcade-themed personal developer portfolio built as a React SPA with pixel-art aesthetics, animated page transitions, and a gamified presentation of projects, skills, and writing.",
+  "theme": "willow",
+  "primaryColor": "#b14cff",
+  "lightColor": "#b6ff3c",
+  "darkColor": "#07060d",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Overview",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart"]
+          },
+          {
+            "group": "Architecture",
+            "pages": ["architecture/overview", "architecture/routing", "architecture/animations"]
+          }
+        ]
+      },
+      {
+        "tab": "Pages & Features",
+        "groups": [
+          {
+            "group": "Pages",
+            "pages": [
+              "pages/home",
+              "pages/about",
+              "pages/projects",
+              "pages/skills",
+              "pages/writing",
+              "pages/case-studies",
+              "pages/contact"
+            ]
+          },
+          {
+            "group": "Components",
+            "pages": ["components/level-layout", "components/page-transition", "components/project-card"]
+          }
+        ]
+      },
+      {
+        "tab": "Customization",
+        "groups": [
+          {
+            "group": "Theming",
+            "pages": ["customization/colors", "customization/fonts", "customization/tailwind-config"]
+          },
+          {
+            "group": "Content",
+            "pages": ["customization/adding-projects", "customization/updating-skills"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Retro arcade aesthetic with scanline effects, neon glow, and pixel fonts",
+    "7 gamified 'levels' for Home, About, Projects, Skills, Writing, Case Studies, and Contact",
+    "Animated page transitions using Framer Motion",
+    "Project cartridge cards with 3D hover effects and category filtering",
+    "Interactive skill constellation map with animated star-field background",
+    "Comic-book style strategy guide layout for blog/writing posts",
+    "Arcade-cabinet-style contact form with initials entry screen",
+    "Boss-rush case study page with animated battle log narrative",
+    "Hash-based routing for static hosting compatibility",
+    "Tailwind CSS with custom arcade color palette and font utilities"
+  ],
+  "publicApiSurface": [
+    "LevelLayout component (wraps each page with loading animation)",
+    "PageTransition component (AnimatePresence-based route transitions)",
+    "ProjectCard component (3D arcade cabinet cartridge card)",
+    "Route /  — Home (Level 1: Character Select)",
+    "Route /about — About (Level 2: Player Profile)",
+    "Route /projects — Projects (Level 3: Cartridge Inventory)",
+    "Route /skills — Skills (Level 4: Skill Tree / Constellation Map)",
+    "Route /writing — Writing (Level 5: Strategy Guides)",
+    "Route /case-studies — Case Studies (Level 6: Boss Rush)",
+    "Route /contact — Contact (Level 7: Final Stage / Continue?)",
+    "Custom Tailwind colors: arcade, purple-deep, purple-electric, magenta-hot, lime-neon, text-offwhite",
+    "Custom Tailwind fonts: font-arcade (Press Start 2P), font-pixel (VT323), font-mono (Space Mono)"
+  ]
+}

@@ -1,0 +1,98 @@
+---
+title: "Customize Dev Arcade's Neon Color Palette"
+sidebarTitle: "Colors"
+description: "Dev Arcade uses six custom Tailwind color tokens. Learn what each one does and how to swap the arcade palette for your own brand colors."
+---
+
+Dev Arcade's visual identity is built on six custom Tailwind color tokens that span the full dark-neon spectrum — from a near-black site background to electric purples, hot magentas, and a signature lime-neon green. Every component in the app references these tokens by name, which means the entire color scheme can be replaced by editing a single object in `tailwind.config.js`.
+
+## Color Palette Reference
+
+| Token | Hex | Usage |
+|---|---|---|
+| `arcade` | `#07060d` | Site background, text-on-light surfaces |
+| `purple-deep` | `#1a0b2e` | Card backgrounds, skill container borders |
+| `purple-electric` | `#b14cff` | Skill labels, tech stack text, scrollbar thumb |
+| `magenta-hot` | `#ff3df0` | Type badges, loading bar, hover accents, scrollbar hover |
+| `lime-neon` | `#b6ff3c` | Headlines, CTA buttons, skill nodes, glow effects |
+| `text-offwhite` | `#f4f1ff` | Body text, readable off-white on dark backgrounds |
+
+## Tailwind Configuration
+
+These tokens live in the `theme.extend.colors` object inside `tailwind.config.js`. Tailwind generates every `bg-*`, `text-*`, `border-*`, and `ring-*` utility for each token automatically.
+
+```js tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        arcade: '#07060d',
+        'purple-deep': '#1a0b2e',
+        'purple-electric': '#b14cff',
+        'magenta-hot': '#ff3df0',
+        'lime-neon': '#b6ff3c',
+        'text-offwhite': '#f4f1ff',
+      },
+    },
+  },
+};
+```
+
+## Swapping the Palette
+
+To replace the arcade palette with your own brand colors, change the hex values in `tailwind.config.js` and rebuild. Because all components reference token names — `text-lime-neon`, `bg-purple-deep`, `border-magenta-hot` — no component files need to be touched.
+
+```bash
+# After editing tailwind.config.js, rebuild the CSS
+npm run build
+```
+
+Here's an example alternative palette for a cyberpunk blue theme:
+
+```js tailwind.config.js
+// Cyberpunk blue theme alternative
+colors: {
+  arcade: '#050a14',
+  'purple-deep': '#0a1628',
+  'purple-electric': '#00d4ff',
+  'magenta-hot': '#ff6b00',
+  'lime-neon': '#00ff88',
+  'text-offwhite': '#e8f4f8',
+}
+```
+
+## Scrollbar Styling
+
+Dev Arcade styles the browser scrollbar to match the neon palette. This CSS lives in the global stylesheet (`main.css` / `index.css`) and uses hardcoded hex values rather than Tailwind utilities, because browser scrollbar pseudo-elements are not supported by Tailwind's utility pipeline.
+
+```css
+::-webkit-scrollbar-thumb {
+  background: #b14cff; /* purple-electric */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff3df0; /* magenta-hot */
+}
+
+::-webkit-scrollbar-track {
+  background: #07060d;              /* arcade */
+  border-left: 2px solid #1a0b2e;  /* purple-deep */
+}
+```
+
+If you swap the palette, remember to update these hex values in the global CSS file to keep the scrollbar in sync with the rest of the UI.
+
+<Tip>
+  Changing colors only requires editing `tailwind.config.js` — every component references the token names, not hardcoded hex values. The one exception is the scrollbar CSS in `main.css` / `index.css`, which uses hardcoded hex values and must be updated separately when you change the palette.
+</Tip>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Tailwind Config" icon="gear" href="/customization/tailwind-config">
+    See the full Tailwind configuration including fonts, keyframes, and animations.
+  </Card>
+  <Card title="Fonts" icon="font" href="/customization/fonts">
+    Learn about the three pixel typefaces and how to swap them out.
+  </Card>
+</CardGroup>

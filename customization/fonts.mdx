@@ -1,0 +1,92 @@
+---
+title: "Dev Arcade Font System: Three Pixel Typefaces"
+sidebarTitle: "Fonts"
+description: "Dev Arcade uses three Google Fonts — Press Start 2P, VT323, and Space Mono — mapped to font-arcade, font-pixel, and font-mono Tailwind utilities."
+---
+
+Dev Arcade uses a deliberate three-font system to create visual hierarchy across its retro UI. **Press Start 2P** delivers the chunky 8-bit pixel weight needed for headings and CTAs. **VT323** provides a lighter, more readable pixel style for secondary labels and stats. **Space Mono** anchors body text and descriptions with a clean monospace feel that reinforces the technical, code-terminal aesthetic. Each font is mapped to a short Tailwind utility class so you can apply the right typeface anywhere in the component tree with a single class name.
+
+## Font Reference
+
+| Tailwind Class | Font Family | Style | Use Cases |
+|---|---|---|---|
+| `font-arcade` | Press Start 2P | 8-bit pixel, heavy weight | Level names, headings, button labels, major CTAs |
+| `font-pixel` | VT323 | Pixel, lighter, more readable | Type badges, stats, secondary labels, score numbers |
+| `font-mono` | Space Mono | Monospace, technical | Body text, descriptions, code-style content |
+
+## Loading the Fonts
+
+All three fonts are loaded from Google Fonts via a single `@import` statement in the global CSS file. The `display=swap` parameter ensures text remains visible during font load — the browser renders fallback fonts first, then swaps in the pixel typefaces once they arrive.
+
+```css
+@import "https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=VT323&display=swap";
+```
+
+## Tailwind Configuration
+
+The fonts are registered in `tailwind.config.js` under `theme.extend.fontFamily`. This creates the `font-arcade`, `font-pixel`, and `font-mono` utility classes used throughout the app.
+
+```js tailwind.config.js
+fontFamily: {
+  arcade: ['"Press Start 2P"', 'cursive'],
+  pixel: ['VT323', 'monospace'],
+  mono: ['Space Mono', 'monospace'],
+}
+```
+
+<Note>
+  `font-arcade` (Press Start 2P) renders very large at standard sizes — it's designed to be used at `text-xl` or larger. Each character is a full pixel-art glyph with significant built-in spacing. Use `text-sm` or `text-xs` only for very short labels where the oversized rendering is intentional.
+</Note>
+
+## Usage Examples
+
+Here's how each font class is applied in practice across Dev Arcade components:
+
+```jsx
+// Level names and main headings
+<h1 className="font-arcade text-3xl text-lime-neon">LEVEL 3: CARTRIDGE INVENTORY</h1>
+
+// Type badges and secondary labels
+<span className="font-pixel text-xl text-purple-electric">TECH: React, D3.js</span>
+
+// Descriptions and body text
+<p className="font-mono text-sm text-gray-300">Analytics dashboard with retro CRT display.</p>
+```
+
+## Replacing the Fonts
+
+To swap out one or all of the typefaces, make two edits:
+
+**1. Update the `@import` URL** in your global CSS file (`main.css` or `index.css`) to load your chosen fonts from Google Fonts (or remove the import entirely if self-hosting):
+
+```css
+/* Replace with your chosen Google Fonts */
+@import "https://fonts.googleapis.com/css2?family=Your+Font+Here&display=swap";
+```
+
+**2. Update `fontFamily` in `tailwind.config.js`** to point the utility classes at the new font names:
+
+```js tailwind.config.js
+fontFamily: {
+  arcade: ['"Your Heading Font"', 'sans-serif'],
+  pixel: ['"Your Label Font"', 'monospace'],
+  mono: ['"Your Body Font"', 'monospace'],
+}
+```
+
+Because the rest of the app uses the `font-arcade`, `font-pixel`, and `font-mono` class names throughout, no component files need to be changed — just the config and the import.
+
+<Tip>
+  The `@import` uses `display=swap` for fast initial rendering, but Press Start 2P is a heavy font (~500 KB) due to its full pixel-art glyph set. For a production deployment, consider self-hosting the font files or adding a `<link rel="preload">` tag in `index.html` to eliminate the layout shift on first load.
+</Tip>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Tailwind Config" icon="gear" href="/customization/tailwind-config">
+    See the full Tailwind configuration including the complete fontFamily block.
+  </Card>
+  <Card title="Colors" icon="palette" href="/customization/colors">
+    Explore the six neon color tokens and how to swap the arcade palette.
+  </Card>
+</CardGroup>

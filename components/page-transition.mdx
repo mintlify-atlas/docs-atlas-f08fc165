@@ -1,0 +1,68 @@
+---
+title: "Page Transitions with AnimatePresence"
+sidebarTitle: "Page Transition"
+description: "Dev Arcade uses Framer Motion's AnimatePresence in wait mode to animate routes in and out sequentially, preventing content overlap during navigation."
+---
+
+Every navigation event in Dev Arcade — clicking a menu item, pressing the browser back button, following a link — triggers a coordinated two-step animation: the current page fades out completely, and only then does the next page begin its entrance. This is handled by Framer Motion's `AnimatePresence` component configured with `mode="wait"`, wrapped around the React Router `<Routes>` tree at the application root. The result is that no two pages are ever visible simultaneously and the URL bar updates cleanly in step with the visual change.
+
+## Router-level setup
+
+The transition scaffolding lives at the top of the component tree and looks like this:
+
+```jsx
+const AppRouter = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/skills" element={<Skills />} />
+        <Route path="/writing" element={<Writing />} />
+        <Route path="/case-studies" element={<CaseStudies />} />
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
+```
+
+The entire app is wrapped in a `HashRouter` (not `BrowserRouter`), which keeps routing client-side without requiring server configuration — appropriate for a static portfolio deployment.
+
+## How `mode="wait"` works
+
+`AnimatePresence` tracks which of its direct children are being removed from the tree. By default it lets the entering and exiting children overlap during the transition. With `mode="wait"` that behavior changes:
+
+1. The **exiting** route's `exit` animation runs to completion.
+2. Only after the exit animation finishes does the **entering** route mount and begin its `initial → animate` animation.
+
+This sequential guarantee is what prevents the visual flash or overlap that would otherwise appear when navigating between pages. Both the exit fade and the entrance fade-and-rise are defined inside [`LevelLayout`](/components/level-layout), which wraps every route's root element in a `motion.div`.
+
+## The `key` prop and route detection
+
+`AnimatePresence` decides whether a child is "new" or "old" based on React's `key` prop. Without an explicit key, navigating between routes would not trigger an exit animation because React sees the same `<Routes>` element staying mounted. Passing `key={location.pathname}` tells React — and therefore `AnimatePresence` — that every distinct URL is a conceptually different component, so the full exit-then-enter sequence fires on every navigation.
+
+## LevelLayout as the motion boundary
+
+`AnimatePresence` at the router level manages *when* transitions happen. The actual animation values — what the element looks like at entry, during display, and on exit — are defined in `LevelLayout`:
+
+<CardGroup cols={2}>
+  <Card title="Loading screen" icon="spinner">
+    Fades in with `initial={{ opacity: 0 }}` and fades out with `exit={{ opacity: 0 }}` while the 800ms timer runs.
+  </Card>
+  <Card title="Content entrance" icon="arrow-up">
+    Enters with `initial={{ opacity: 0, y: 20 }}` and settles to `animate={{ opacity: 1, y: 0 }}` over 400ms after the timer resolves.
+  </Card>
+</CardGroup>
+
+Because every page uses `LevelLayout`, `AnimatePresence` always has a `motion.div` with defined `exit` props to animate — a requirement for the `mode="wait"` exit sequence to work correctly.
+
+## The `PageTransition.js` shared module
+
+`PageTransition.js` in the `components/` directory is a Vite code-split chunk rather than a hand-authored component file. During the production build, Vite identifies React, Framer Motion (`motion`, `AnimatePresence`), and React Router hooks (`useLocation`, `useNavigate`) as shared dependencies and extracts them into this chunk so they are downloaded once and reused across all lazily loaded route bundles. You will see it referenced in the network tab as a separate JS file on first load, but you do not need to import from it directly — Vite handles the resolution automatically.
+
+<Tip>
+  When you add a new route to `AppRouter`, always wrap the new page component with `LevelLayout` and pass an appropriate `levelName`. Without `LevelLayout`, the route's root element will not be a `motion.div`, `AnimatePresence` will have nothing to animate on exit, and the `mode="wait"` sequence will break — the new page will snap in instantly while the previous page is still mid-exit.
+</Tip>

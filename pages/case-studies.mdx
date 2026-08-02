@@ -1,0 +1,92 @@
+---
+title: "Level 6 — Case Studies: Boss Rush Battle Format"
+sidebarTitle: "Case Studies"
+description: "Case studies in Dev Arcade use an RPG boss-fight format with an HP bar, animated battle log, and victory screen to narrate technical achievements."
+---
+
+Most portfolio case studies read like project reports — a problem statement, a bullet list of technologies, and a vague claim about impact. Dev Arcade takes a different approach: each case study is staged as an RPG boss battle. The technical challenge becomes the enemy, the engineering decisions become combat moves, and the measurable outcome becomes the kill shot. This framing makes even a dry infrastructure migration feel like a climactic encounter, and it gives visitors a memorable narrative anchor for each achievement.
+
+## The Boss-Rush Format
+
+The Case Studies page (`/case-studies`) is labelled **LEVEL 6: BOSS RUSH**. A "boss rush" in gaming is a gauntlet where you face a series of powerful enemies back-to-back — an apt metaphor for the kind of high-stakes technical problems that make for compelling case studies. Each case study maps one real engineering challenge to one boss fight, complete with a health bar that counts down to zero as the story unfolds.
+
+## Battle UI Components
+
+The battle arena is built from four stacked layers that work together to tell the story:
+
+<Steps>
+  <Step title="Boss Header">
+    Displays the boss name and level at the top of the arena — in the current build, **LEGACY MONOLITH (LVL 99)**. Directly below the name is the HP bar: a red filled rectangle that animates its width from `100%` to `0%` over two seconds (with a one-second initial delay), visualising the migration being completed in real time.
+
+    ```jsx
+    <motion.div
+      initial={{ width: '100%' }}
+      animate={{ width: '0%' }}
+      transition={{ duration: 2, delay: 1 }}
+      className="h-full bg-red-600"
+    />
+    ```
+
+    The outer track is a dark-grey bar; the animated inner fill shrinks left-to-right as the transition plays, giving the satisfying impression of draining an enemy's health.
+  </Step>
+  <Step title="Battle Arena">
+    A visually distinct panel that frames the fight. A **red scanlines overlay** — a CSS repeating linear gradient of semi-transparent horizontal lines — is layered over the arena content to evoke the look of a CRT monitor. This reinforces the retro aesthetic while keeping the text readable underneath.
+  </Step>
+  <Step title="Battle Log">
+    A terminal-style text block where each line of the encounter fades in sequentially using Framer Motion staggered delays. The lines read like a turn-based RPG combat log, translating real engineering decisions into game actions:
+
+    ```text
+    > Battle initiated: Refactoring the Legacy Monolith.
+    > Player uses [STRATEGY: MICROSERVICES]. It's super effective!
+    > Boss attacks with [SPAGHETTI CODE]. Player dodges.
+    > Player casts [TYPESCRIPT MIGRATION]. Critical hit!
+    > Boss defeated. Load times decreased by 40%.
+    ```
+
+    Each line is wrapped in a `motion.p` and animates from `opacity: 0` to `opacity: 1` at a staggered delay:
+
+    | Line | Delay |
+    |------|-------|
+    | Battle initiated… | 0.5 s |
+    | Player uses MICROSERVICES | 1.0 s |
+    | Boss attacks with SPAGHETTI CODE | 1.5 s |
+    | Player casts TYPESCRIPT MIGRATION | 2.0 s |
+    | Boss defeated. | 2.5 s |
+  </Step>
+  <Step title="Victory Screen">
+    Once the HP bar animation completes, a victory overlay scales into view on top of the arena. It uses a Framer Motion scale entrance (`scale: 0.5 → 1`) and displays three elements:
+
+    - **"VICTORY!"** — large, flashing headline
+    - **"SYSTEM MIGRATED SUCCESSFULLY"** — the outcome summary
+    - **"+5000 EXP"** — the experience reward, reinforcing the RPG metaphor
+
+    ```jsx
+    <motion.div
+      initial={{ scale: 0.5, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ delay: 3 }}
+    >
+      <h2>VICTORY!</h2>
+      <p>SYSTEM MIGRATED SUCCESSFULLY</p>
+      <p>+5000 EXP</p>
+    </motion.div>
+    ```
+  </Step>
+</Steps>
+
+## Adding a Second Case Study
+
+The current implementation renders a single hard-coded boss encounter. To extend the page into a true boss rush with multiple case studies, you would need to:
+
+1. Extract the battle data (boss name, level, battle log lines, victory text, XP reward) into an array of case study objects.
+2. Map over that array to render one arena per entry.
+3. Consider whether all HP bars should animate simultaneously or whether each fight should trigger only after the previous boss is defeated (a sequential reveal creates better narrative pacing).
+
+<Tip>
+  To customise the existing boss fight for your own case study, change these four things in the component:
+
+  - **Boss name & level** — replace `"LEGACY MONOLITH (LVL 99)"` with the name of your technical challenge and a level that reflects its difficulty.
+  - **HP bar description** — update the label beside the bar (e.g. `"TECHNICAL DEBT"`, `"BUNDLE SIZE"`) to match what is being reduced.
+  - **Battle log entries** — rewrite each `>` line to describe your actual strategies, the obstacles you encountered, and the measurable result. Keep the bracketed `[ACTION]` format for readability.
+  - **Victory text** — replace `"SYSTEM MIGRATED SUCCESSFULLY"` and `"+5000 EXP"` with your real outcome and a proportional XP value that signals the effort involved.
+</Tip>

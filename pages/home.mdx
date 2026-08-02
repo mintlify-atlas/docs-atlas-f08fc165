@@ -1,0 +1,81 @@
+---
+title: "Level 1 — Home: Arcade Landing Screen"
+sidebarTitle: "Home"
+description: "The Dev Arcade home page is an animated character-select landing screen with a star-field background, scanlines, and an INSERT COIN ticker."
+---
+
+The home page is the first thing visitors encounter when they load Dev Arcade. Themed as **"LEVEL 1: CHARACTER SELECT"**, it sets the tone for the entire portfolio with a full-screen arcade aesthetic — a procedurally animated star-field behind classic CRT scanline overlays, a bold hero section introducing the portfolio owner, and navigation links styled as arcade cabinet menu items. Everything is wrapped in `LevelLayout`, which plays an 800 ms loading animation before revealing the content, mimicking a real cartridge boot sequence.
+
+## Visual Design
+
+The background layers two CSS classes — `starfield` and `scanlines` — on top of each other to produce the signature retro look. `starfield` renders a field of drifting pixels that gives the impression of traveling through space, while `scanlines` overlays a repeating horizontal-line pattern that simulates the electron-beam flicker of a CRT monitor. Neither layer interferes with the foreground content; they run purely as decorative backdrop elements.
+
+The hero section sits at the center of the viewport and contains the arcade logo, the portfolio owner's name rendered in the primary neon font, and a short tagline or bio line. Below the hero, a set of navigation links is displayed as an arcade-style vertical menu — each item corresponds to one of the four levels in the portfolio.
+
+<CardGroup cols={2}>
+  <Card title="Star-Field Background" icon="star">
+    A continuously animated field of drifting pixel-stars rendered via the `starfield` CSS class, giving the impression of deep-space travel.
+  </Card>
+  <Card title="CRT Scanlines Overlay" icon="tv-retro">
+    The `scanlines` CSS class overlays a repeating horizontal-line pattern on the entire viewport, replicating the look of a cathode-ray tube display.
+  </Card>
+  <Card title="Hero Section" icon="bolt">
+    Displays the arcade logo, owner name in lime-neon typography, and a short bio/tagline in the center of the screen.
+  </Card>
+  <Card title="Arcade Nav Menu" icon="gamepad">
+    Navigation links to all other levels are rendered as selectable arcade-cabinet menu items, reinforcing the character-select metaphor.
+  </Card>
+</CardGroup>
+
+## Level Structure & `LevelLayout`
+
+Every page in Dev Arcade — including the home page — is wrapped in the `LevelLayout` component. `LevelLayout` receives a `levelName` prop (here `"LEVEL 1: CHARACTER SELECT"`) and displays it as the screen's heading. Before the main content becomes visible, it runs an **800 ms boot animation** that mimics a game cartridge loading, complete with a brief progress flicker. This gives every page transition a consistent, polished feel.
+
+```jsx
+// Simplified representation of how LevelLayout is used on the home page
+<LevelLayout levelName="LEVEL 1: CHARACTER SELECT">
+  {/* Hero section, nav links, and marquee ticker live here */}
+</LevelLayout>
+```
+
+<Note>
+  The home page is served at the root path `/`. If the project is configured with hash-based routing (common for static hosts such as GitHub Pages), the URL will appear as `/#/`. Either way, the home page is always the application's entry point.
+</Note>
+
+## INSERT COIN Marquee Ticker
+
+At the very bottom of the screen, a horizontal marquee ticker scrolls the text **`INSERT COIN TO CONTINUE`** from right to left in an infinite loop. This is a direct homage to the attract-mode screens of classic arcade cabinets, which would cycle demo gameplay and call-to-action text to lure passers-by. The ticker uses a CSS `marquee`-style animation so it runs smoothly at a constant speed regardless of viewport width.
+
+<Tip>
+  To change the marquee message, locate the ticker component on the home page and update the string passed as its content prop. Keep the text short and uppercase for the most authentic arcade appearance.
+</Tip>
+
+## Navigation Links
+
+The home page lists navigation links to all four levels of the portfolio. Each link is styled as an arcade menu item — uppercase label, neon color on hover, and a blinking cursor indicator when focused. The links route to:
+
+| Menu Item | Route | Level Name |
+|-----------|-------|------------|
+| PLAYER PROFILE | `/about` | Level 2 |
+| CARTRIDGE INVENTORY | `/projects` | Level 3 |
+| SKILL TREE | `/skills` | Level 4 |
+
+## Customizing the Headline & Bio
+
+The hero section contains two pieces of copy you will want to update before deploying your own version of Dev Arcade:
+
+<Steps>
+  <Step title="Update the Portfolio Owner Name">
+    Find the hero section in the home page source. Replace the placeholder name string with your own name or handle. The text is rendered in the primary arcade font at a large size, so keep it concise — a username or short full name works best.
+  </Step>
+  <Step title="Edit the Tagline / Bio Line">
+    Directly below the name, a shorter tagline line introduces your role or specialty (e.g., `FULL-STACK DEVELOPER`). Update this string to reflect your own title or a short punchy descriptor.
+  </Step>
+  <Step title="Adjust the Marquee Text (Optional)">
+    The `INSERT COIN TO CONTINUE` string in the bottom ticker is passed directly as content to the marquee component. You may leave it as-is for maximum arcade authenticity, or swap it for a custom call-to-action.
+  </Step>
+</Steps>
+
+<Warning>
+  The home page intentionally uses all-caps text throughout to match arcade cabinet conventions. If you introduce mixed-case strings, they will visually break the aesthetic — use `text-transform: uppercase` in CSS or convert strings to uppercase in code before rendering.
+</Warning>

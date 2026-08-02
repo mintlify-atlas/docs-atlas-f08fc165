@@ -1,0 +1,128 @@
+---
+title: "Level 5 — Writing: Comic-Book Strategy Guides"
+sidebarTitle: "Writing"
+description: "The Writing page presents blog posts as comic book covers with staggered entrance animations, barcode graphics, and a READ NOW call to action."
+---
+
+The Writing page abandons the conventional blog grid in favour of a comic book rack. Each article becomes a collectible issue — complete with a volume number, publication date, a bold full-bleed colour swatch, and a barcode at the bottom. The effect instantly communicates the personality of the content before a visitor reads a single word, turning what is normally a plain list of links into something you want to flip through.
+
+## Layout & Card Design
+
+Unlike a standard blog index that renders post titles as anchor tags in a vertical list, the Writing page (`/writing`) renders a three-column grid of cards labelled **LEVEL 5: STRATEGY GUIDES**. Every card is styled to look like the cover of a printed comic — a saturated background colour, a thick coloured border, large all-caps title lettering, and metadata positioned exactly where you'd find it on a newsstand issue.
+
+<CardGroup cols={3}>
+  <Card title="VOL. 42 — OCT 2023" icon="book-open">
+    DEFEATING THE MEMORY LEAK BOSS — red-themed cover
+  </Card>
+  <Card title="VOL. 43 — NOV 2023" icon="book-open">
+    SPEEDRUNNING REACT PERFORMANCE — blue-themed cover
+  </Card>
+  <Card title="VOL. 44 — DEC 2023" icon="book-open">
+    THE ULTIMATE CSS GRID CHEAT CODE — green-themed cover
+  </Card>
+</CardGroup>
+
+## Blog Post Data Structure
+
+Each post is described by a plain object that carries both the content metadata and the Tailwind utility classes that control its visual appearance. This keeps the colour logic co-located with the data instead of scattered across conditional class names.
+
+```typescript
+interface BlogPost {
+  id: number;
+  title: string;  // All caps, arcade-style title
+  issue: string;  // Volume number, e.g. "VOL. 42"
+  date: string;   // Month + year, e.g. "OCT 2023"
+  color: string;  // Tailwind background class for card color
+  border: string; // Tailwind border class for card border
+}
+```
+
+The three posts currently in the array are:
+
+```typescript
+const blogPosts: BlogPost[] = [
+  {
+    id: 1,
+    title: "DEFEATING THE MEMORY LEAK BOSS",
+    issue: "VOL. 42",
+    date: "OCT 2023",
+    color: "bg-red-900",
+    border: "border-red-500",
+  },
+  {
+    id: 2,
+    title: "SPEEDRUNNING REACT PERFORMANCE",
+    issue: "VOL. 43",
+    date: "NOV 2023",
+    color: "bg-blue-900",
+    border: "border-blue-500",
+  },
+  {
+    id: 3,
+    title: "THE ULTIMATE CSS GRID CHEAT CODE",
+    issue: "VOL. 44",
+    date: "DEC 2023",
+    color: "bg-green-900",
+    border: "border-green-500",
+  },
+];
+```
+
+## Stagger Entrance Animation
+
+Cards animate in using **Framer Motion**. Rather than all three appearing at once, each card is delayed by an extra 200 ms relative to the previous one, creating a left-to-right cascade that mimics cards being dealt onto a table.
+
+```jsx
+// Applied to each card wrapper via its array index
+<motion.div
+  initial={{ y: 50, opacity: 0 }}
+  animate={{ y: 0, opacity: 1 }}
+  transition={{ delay: index * 0.2 }}
+>
+  {/* card content */}
+</motion.div>
+```
+
+| Card | Delay |
+|------|-------|
+| DEFEATING THE MEMORY LEAK BOSS | 0 ms |
+| SPEEDRUNNING REACT PERFORMANCE | 200 ms |
+| THE ULTIMATE CSS GRID CHEAT CODE | 400 ms |
+
+## Anatomy of a Comic-Book Card
+
+Each card is composed of four visual layers stacked top-to-bottom:
+
+<Steps>
+  <Step title="Header Bar">
+    A flex row with the issue number pinned to the left (`VOL. 42`) and the publication date pinned to the right (`OCT 2023`), rendered in small uppercase text against the card's background colour.
+  </Step>
+  <Step title="Title Block">
+    The post title in large, bold, all-caps lettering that fills most of the card's vertical space. The font weight and size intentionally overpowers the rest of the layout — just like a real comic masthead.
+  </Step>
+  <Step title="Barcode Graphic">
+    A white rectangle near the bottom of the card containing a row of thin vertical `div` bars, each assigned a random width on mount. This purely decorative element reinforces the printed-product aesthetic.
+
+    ```jsx
+    // Barcode: a row of random-width vertical bars inside a white box
+    <div className="...white-box...">
+      {Array.from({ length: 20 }).map((_, i) => (
+        <div
+          key={i}
+          style={{ width: `${Math.random() * 3 + 1}px` }}
+          className="h-full bg-black"
+        />
+      ))}
+    </div>
+    ```
+  </Step>
+  <Step title="Call to Action">
+    A yellow **"READ NOW >"** label at the base of the card. It pulses with a scale animation on hover to draw the visitor's eye and invite interaction.
+  </Step>
+</Steps>
+
+<Note>
+  The `blogPosts` array is the single place to add new writing entries. To publish a new article, append an object with a unique `id`, `title`, `issue`, `date`, and a matching Tailwind `color`/`border` pair.
+
+  Note that the cards do **not** currently link anywhere — there is no `href` field on the `BlogPost` type. To make them clickable, add an `href: string` property to the interface, populate it in the data array, and wrap the card (or just the "READ NOW >" label) in a `<a href={post.href}>` or React Router `<Link to={post.href}>`.
+</Note>

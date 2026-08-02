@@ -1,0 +1,134 @@
+---
+title: "Framer Motion Animation System in Dev Arcade"
+sidebarTitle: "Animations"
+description: "Dev Arcade uses Framer Motion 11 for page transitions, loading screens, hover effects, and SVG path animations. Learn how each layer works."
+---
+
+Dev Arcade uses Framer Motion 11 throughout its component tree — from top-level route transitions that gate which page is visible, down to individual card hover effects that create a tactile 3D feel. The animation system is organized in layers: the router controls macro transitions between pages, the `LevelLayout` wrapper controls the per-page loading reveal, and individual components own their own entrance and interaction animations. A final layer of pure CSS effects handles ambient visuals like the star-field and scanlines that would be wasteful to drive with JavaScript.
+
+## Page Transition Layer
+
+At the router level, `AnimatePresence mode="wait"` wraps the `<Routes>` component. Every page's root element is a `motion.div` that declares `initial`, `animate`, and `exit` variants. The entering page fades up from a slight vertical offset, and the exiting page fades out in place.
+
+```jsx
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0 }}
+  transition={{ duration: 0.4 }}
+>
+  {/* page content */}
+</motion.div>
+```
+
+The `mode="wait"` setting on `AnimatePresence` ensures the exiting page's `exit` animation (fade to `opacity: 0`) completes in full before the incoming page begins its `initial → animate` sequence. This prevents two pages from being visible at the same time and keeps the transition feeling deliberate rather than rushed.
+
+## LevelLayout Loading Screen
+
+Every page in the application is wrapped in the `LevelLayout` component, which plays an 800ms loading sequence before revealing its children. The loading screen displays a pulsing level name headline and an animated magenta progress bar that fills from left to right.
+
+```jsx
+<motion.div
+  initial={{ width: '0%' }}
+  animate={{ width: '100%' }}
+  transition={{ duration: 0.7, ease: 'linear' }}
+  className="h-full bg-magenta-hot"
+/>
+```
+
+After 800ms, `LevelLayout` unmounts the loading screen and mounts the page content. The content itself enters with the same `opacity: 0 → 1, y: 20 → 0` pattern used by the page transition layer, creating a consistent feel across all routes. The loading screen reinforces the arcade theme — each page load reads as a new "level" starting up.
+
+<Note>
+  The 800ms duration is intentionally brief. It is long enough to register as a purposeful transition rather than a flash of unstyled content, but short enough that it does not feel like a real loading delay on fast connections.
+</Note>
+
+## 3D Project Card Hover
+
+Project cards on the `/projects` route use Framer Motion's `whileHover` prop to apply a 3D tilt and scale effect. The `perspective` style value on the parent container provides the depth context that makes the rotation read as three-dimensional.
+
+```jsx
+<motion.div
+  whileHover={{ rotateX: 15, rotateY: -10, scale: 1.05 }}
+  style={{ perspective: 1000 }}
+>
+  {/* project card content */}
+</motion.div>
+```
+
+Framer Motion interpolates all three transform values simultaneously when the user's pointer enters the element, and reverses them on pointer leave. The `perspective: 1000` value (in pixels) controls how pronounced the 3D effect appears — lower values produce more extreme foreshortening, higher values flatten it out.
+
+## Staggered Entrance Animations
+
+List items, skill badges, and card grids use a stagger pattern to animate in one after another rather than all at once. Each item receives a `delay` that is a multiple of its index in the array.
+
+```jsx
+<motion.div
+  initial={{ y: 50, opacity: 0 }}
+  animate={{ y: 0, opacity: 1 }}
+  transition={{ delay: index * 0.2 }}
+>
+  {/* list item or card */}
+</motion.div>
+```
+
+This creates a cascading entrance that draws the eye down through the content in sequence. The `y: 50 → 0` movement gives each item a sense of arriving from slightly below its final position, while the `opacity: 0 → 1` ensures nothing is visible until the item begins moving.
+
+<Tip>
+  Keep the per-item delay multiplier small (0.1–0.2s) for grids with many items. A 0.2s multiplier on a 10-item list means the last item doesn't start animating until 1.8s after mount, which can make the page feel slow.
+</Tip>
+
+## SVG Path Animation
+
+The Skills page features a constellation map rendered as an SVG. The connecting path between nodes is drawn progressively using Framer Motion's `pathLength` motion value, which animates the SVG `stroke-dashoffset` under the hood.
+
+```jsx
+<motion.path
+  initial={{ pathLength: 0, opacity: 0 }}
+  animate={{ pathLength: 1, opacity: 0.3 }}
+  transition={{ duration: 2, ease: 'easeInOut' }}
+  d="M 20% 30% L 50% 15% ..."
+  stroke="#b14cff"
+  fill="none"
+/>
+```
+
+At `pathLength: 0` the path is invisible (fully dashed away). As the value animates to `1`, the stroke draws itself from start to end over 2 seconds. The `easeInOut` easing starts slowly, accelerates through the middle, and decelerates at the end — making the draw feel hand-traced rather than mechanical. The final `opacity: 0.3` keeps the constellation subtle so it doesn't compete with the skill nodes themselves.
+
+## CSS-Based Effects
+
+Some visual effects are implemented in pure CSS rather than Framer Motion. These are ambient, always-on effects that do not respond to user interaction or route state, making CSS the more appropriate and performant tool.
+
+<CardGroup cols={2}>
+  <Card title="Scanlines" icon="lines-leaning">
+    A `linear-gradient` repeating at 4px intervals is layered over the viewport as a fixed overlay. The alternating transparent and semi-opaque bands replicate the horizontal scanline pattern of a CRT monitor, giving the entire UI a subtle retro screen texture.
+  </Card>
+  <Card title="Star-field" icon="stars">
+    A `radial-gradient` pattern of small dots is applied as a `background-image` and animated with a `stars` keyframe that scrolls `background-position` continuously over 100 seconds. The slow scroll speed makes the star field feel like deep space drifting rather than a looping tile.
+  </Card>
+  <Card title="Neon Glow" icon="lightbulb">
+    Tailwind's `drop-shadow` utilities apply colored box shadows to text and UI elements — for example, `drop-shadow-[0_0_8px_rgba(182,255,60,0.5)]` for a lime-green glow. This mimics the light bleed of neon signage and illuminated arcade cabinets without any JavaScript overhead.
+  </Card>
+  <Card title="Hot Magenta Accents" icon="palette">
+    The progress bar and various interactive highlights use a custom `bg-magenta-hot` Tailwind color, defined in the Tailwind config. Paired with the neon glow utilities, this creates the signature magenta-on-dark palette of classic arcade attract screens.
+  </Card>
+</CardGroup>
+
+## Accessibility: Reducing Motion
+
+Framer Motion 11 provides built-in support for the `prefers-reduced-motion` media query via the `MotionConfig` component. Wrapping the application root with the configuration below causes Framer Motion to skip all animations for users who have enabled the "reduce motion" accessibility setting in their OS.
+
+```jsx
+import { MotionConfig } from "framer-motion";
+
+function App() {
+  return (
+    <MotionConfig reducedMotion="user">
+      {/* router and page tree */}
+    </MotionConfig>
+  );
+}
+```
+
+<Tip>
+  `reducedMotion="user"` reads the system preference automatically — you do not need to query `window.matchMedia` yourself. Setting it to `"always"` disables all animations unconditionally, which is useful for automated snapshot testing or accessibility audits.
+</Tip>

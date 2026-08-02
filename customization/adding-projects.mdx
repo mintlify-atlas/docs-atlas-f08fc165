@@ -1,0 +1,205 @@
+---
+title: "Add Your Own Projects to the Cartridge Inventory"
+sidebarTitle: "Add Projects"
+description: "Edit the projects data array in the Projects page component to add, remove, or reorder project cartridges in the Level 3 grid."
+---
+
+Every project card in the Level 3 grid is driven by a single plain JavaScript array defined at the top of the Projects page component. There is no external database or CMS — adding a new project cartridge is as simple as appending an object to that array, choosing the right filter category, and rebuilding the bundle. This page walks you through every field, explains the filter system, and shows you how to wire up the **LOAD GAME** and **VIEW SOURCE** hover buttons so they open real URLs.
+
+## The `Project` Interface
+
+Each entry in the projects array must conform to the following shape:
+
+```typescript
+interface Project {
+  id: number;
+  title: string;      // All-caps arcade style, e.g. "RETRO.DASH"
+  type: 'APP' | 'ECOMMERCE' | 'DASHBOARD' | 'SOCIAL'; // maps to filter buttons
+  desc: string;
+  tech: string;
+  sampleData: boolean;
+}
+```
+
+<Steps>
+  <Step title="Locate the projects array">
+    Open the Projects page component — this is the **Level 3** route in the SPA. Look for the array declared before the `Projects` component function itself. It will be named something like `projectsData` or similar. The existing entries look like this:
+
+    ```typescript
+    const projects: Project[] = [
+      {
+        id: 1,
+        title: 'RETRO.DASH',
+        type: 'DASHBOARD',
+        desc: 'Analytics dashboard with retro CRT display.',
+        tech: 'React, D3.js',
+        sampleData: false,
+      },
+      {
+        id: 2,
+        title: 'COIN.SHOP',
+        type: 'ECOMMERCE',
+        desc: 'Pixel art themed e-commerce storefront.',
+        tech: 'Next.js, Stripe',
+        sampleData: true,
+      },
+      {
+        id: 3,
+        title: 'DATA.QUEST',
+        type: 'DASHBOARD',
+        desc: 'RPG-styled data visualization tool.',
+        tech: 'Vue, D3.js',
+        sampleData: true,
+      },
+      {
+        id: 4,
+        title: 'PIXEL.CHAT',
+        type: 'SOCIAL',
+        desc: 'WebSocket based retro chat room.',
+        tech: 'Socket.io, React',
+        sampleData: false,
+      },
+    ];
+    ```
+  </Step>
+
+  <Step title="Add a new entry">
+    Append a new object to the array. Assign a unique `id` that does not clash with any existing entry. Here is a complete example:
+
+    ```typescript
+    {
+      id: 5,
+      title: 'DARK.BOARD',
+      type: 'DASHBOARD',
+      desc: 'Real-time monitoring dashboard with WebSocket feeds.',
+      tech: 'React, WebSocket, Chart.js',
+      sampleData: false,
+    }
+    ```
+
+    The `ProjectCard` component renders each field as follows:
+
+    | Field | Rendered as |
+    |---|---|
+    | `title` | Lime-neon heading in `font-arcade` |
+    | `type` | Magenta badge in the card's top-right corner |
+    | `desc` | Small monospace paragraph in gray |
+    | `tech` | `TECH: {value}` in electric-purple `font-pixel` |
+    | `sampleData` | Yellow `⚠ SAMPLE DATA` badge when `true` |
+  </Step>
+
+  <Step title="Choose the correct `type`">
+    The Projects page renders a row of filter buttons at the top. Clicking a button hides every card whose `type` does not match. The current valid values and their corresponding buttons are:
+
+    | `type` value | Filter button |
+    |---|---|
+    | _(any)_ | **ALL** |
+    | `'APP'` | **APP** |
+    | `'ECOMMERCE'` | **ECOMMERCE** |
+    | `'DASHBOARD'` | **DASHBOARD** |
+    | `'SOCIAL'` | **SOCIAL** |
+
+    If your project does not fit any of these categories, use a new string value — for example `'GAME'` — and add a matching filter button to the filter row inside the Projects component so users can select it.
+  </Step>
+
+  <Step title="Set `sampleData`">
+    Set `sampleData: true` if the live or demo version of the project is populated with placeholder or generated data rather than real content. When this flag is `true`, `ProjectCard` renders a yellow warning badge on the card so visitors know the demo is not production data. Set it to `false` for projects with live, real data.
+  </Step>
+
+  <Step title="Rebuild">
+    After saving your changes, compile the updated bundle:
+
+    ```bash
+    npm run build
+    ```
+
+    The new cartridge will appear in the Level 3 grid on the next page load.
+  </Step>
+</Steps>
+
+---
+
+## Wiring Up the LOAD GAME and VIEW SOURCE Buttons
+
+The hover overlay on each `ProjectCard` already renders two buttons — **LOAD GAME** and **VIEW SOURCE** — but they currently have no `href` or `onClick` handler attached. To make them navigate to real URLs, you need to extend the `Project` interface with two optional fields and update the button elements in `ProjectCard`.
+
+### Step 1 — Extend the interface
+
+Add `liveUrl` and `sourceUrl` as optional strings:
+
+```typescript
+// Extended Project interface
+interface Project {
+  id: number;
+  title: string;
+  type: string;
+  desc: string;
+  tech: string;
+  sampleData: boolean;
+  liveUrl?: string;    // URL for "LOAD GAME" button
+  sourceUrl?: string;  // URL for "VIEW SOURCE" button
+}
+```
+
+### Step 2 — Update the ProjectCard component
+
+Inside `ProjectCard`, find the two button elements in the hover overlay and replace them with anchor tags (or add `onClick` handlers that call `window.open()`):
+
+```tsx
+// "LOAD GAME" button
+<a
+  href={project.liveUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="..."
+>
+  LOAD GAME
+</a>
+
+// "VIEW SOURCE" button
+<a
+  href={project.sourceUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="..."
+>
+  VIEW SOURCE
+</a>
+```
+
+If either URL is absent you may want to conditionally disable or hide the button to avoid broken links.
+
+### Step 3 — Add URLs to your project entries
+
+```typescript
+// Updated project entry with live and source URLs
+{
+  id: 5,
+  title: 'DARK.BOARD',
+  type: 'DASHBOARD',
+  desc: 'Real-time monitoring dashboard with WebSocket feeds.',
+  tech: 'React, WebSocket, Chart.js',
+  sampleData: false,
+  liveUrl: 'https://darkboard.example.com',
+  sourceUrl: 'https://github.com/yourhandle/dark-board',
+}
+```
+
+<Note>
+  The `id` field on every project entry must be unique. React uses it as the `key` prop when rendering the grid, so duplicate IDs will cause rendering bugs and React warnings in the console.
+</Note>
+
+<Tip>
+  Titles look best when written in all caps with dot notation — for example `RETRO.DASH`, `COIN.SHOP`, `PIXEL.CHAT` — to match the arcade cartridge aesthetic. Keep them short (one to two dot-separated words) so they fit cleanly inside the card's lime-neon heading.
+</Tip>
+
+---
+
+<CardGroup cols={2}>
+  <Card title="Projects Page" icon="gamepad-2" href="/pages/projects">
+    Learn how the Level 3 route renders the cartridge grid and manages filter state.
+  </Card>
+  <Card title="ProjectCard Component" icon="layers" href="/components/project-card">
+    See how each field is mapped to styled elements inside the card, including the hover overlay.
+  </Card>
+</CardGroup>

@@ -1,0 +1,68 @@
+---
+title: "Dev Arcade Architecture: How the SPA Is Structured"
+sidebarTitle: "Overview"
+description: "Dev Arcade is a Vite-built React SPA. Understand how the entry points, shared component bundle, routing, and animation layers fit together."
+---
+
+Dev Arcade is a Vite-compiled React single-page application built around a clean three-layer architecture. Static HTML entry points hand off to a shared JavaScript module, which in turn powers the full React component tree — complete with hash-based routing, Framer Motion transitions, and a Tailwind CSS retro aesthetic. Understanding how these three layers interact makes it straightforward to add new pages, tweak animations, or adapt the project for different hosting environments.
+
+## The Three-Layer Model
+
+Each layer has a single, well-defined responsibility. The HTML entry points handle initial navigation, the shared module exports foundational primitives, and the main bundle owns all application logic.
+
+<Steps>
+  <Step title="HTML Entry Points — index.html + pages/*.html">
+    Every route in the app has a corresponding HTML file. `index.html` is the root entry point served at `/`. Each file inside `pages/` carries an inline `<script>` that sets `window.__STATIC_PAGE_ROUTE__` and immediately redirects the browser to the correct hash URL (e.g., `#/about`). This means a user who lands directly on `/about` — via a shared link or a page refresh — is bounced to `#/about` before React ever mounts, so the router always sees a valid hash.
+  </Step>
+  <Step title="Shared Module — components/PageTransition.js">
+    This module re-exports the core primitives consumed by the main bundle: React and ReactDOM, Framer Motion's `motion` factory and `AnimatePresence`, and React Router DOM's `HashRouter`, `Routes`, `Route`, and `Link`. Keeping these in a shared chunk avoids duplicating large vendor libraries across entry points and gives Vite a clear boundary for code-splitting.
+  </Step>
+  <Step title="Main Bundle — assets/main.js">
+    The compiled bundle contains every React component, all route definitions, Tailwind utility classes (via the generated `assets/main.css`), static data arrays (projects, skills, writing entries), and the full application logic. Because every `pages/*.html` file loads the same `assets/main.js`, there is only one copy of the component tree regardless of which HTML entry point the browser fetched first.
+  </Step>
+</Steps>
+
+## File Structure
+
+The repository layout maps directly onto the three-layer model described above.
+
+```text
+dev-arcade/
+├── index.html              # Root entry point
+├── pages/                  # Static HTML entry points per route
+│   ├── Home.html           # window.__STATIC_PAGE_ROUTE__ = "/"
+│   ├── About.html          # window.__STATIC_PAGE_ROUTE__ = "/about"
+│   ├── Projects.html
+│   ├── Skills.html
+│   ├── Writing.html
+│   ├── CaseStudies.html
+│   └── Contact.html
+├── assets/
+│   ├── main.js             # Full compiled React bundle
+│   └── main.css            # Tailwind output + custom CSS
+└── components/
+    └── PageTransition.js   # Shared module (Framer Motion, React Router, React exports)
+```
+
+## Why Multiple HTML Entry Points?
+
+Static hosts — GitHub Pages, Netlify, Vercel's static adapter — serve files directly from a build output directory. They have no application server to intercept a request for `/projects` and return `index.html`. If a user refreshes on `/projects`, the host returns a 404.
+
+The `pages/` HTML files solve this without any server configuration. Vite's `build.rollupOptions.input` is configured to include every HTML file as a build entry, so each route gets its own file in the output. When the host serves `pages/Projects.html`, the inline script redirects to `#/projects` and React Router takes over — no redirect rules, no `_redirects` file, no `vercel.json` rewrites needed.
+
+<Note>
+  All seven HTML files load the same `assets/main.js` bundle. The only difference between them is the `window.__STATIC_PAGE_ROUTE__` value in the inline script.
+</Note>
+
+## Next Steps
+
+Explore the two deeper-dive pages below to understand how routing and animations are implemented inside the main bundle.
+
+<CardGroup cols={2}>
+  <Card title="Routing" icon="route" href="/architecture/routing">
+    Learn how `HashRouter`, seven route definitions, and the static entry point redirect pattern work together to enable navigation on any static host.
+  </Card>
+  <Card title="Animations" icon="wand-magic-sparkles" href="/architecture/animations">
+    Explore the full Framer Motion animation system: page transitions, the `LevelLayout` loading screen, 3D card hovers, staggered entrances, and SVG path drawing.
+  </Card>
+</CardGroup>

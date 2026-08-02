@@ -1,0 +1,166 @@
+---
+title: "Update the Skills Constellation with Your Tech Stack"
+sidebarTitle: "Update Skills"
+description: "Replace the skill nodes and tools in Level 4 by editing the skills and tools arrays. Also update the SVG path to connect your new node positions."
+---
+
+The Level 4 Skills page is built around an interactive constellation map where each star represents a technology in your stack. Nodes are positioned using `x` and `y` percentage values relative to their container, so they scale cleanly at any viewport width. The stars are connected by a single hardcoded SVG path — a stylised line that you draw manually. Below the constellation, a "POWER-UPS COLLECTED" grid lists your supporting tools, each paired with a Lucide React icon. Hovering any node reveals a tooltip that displays its `level` string. This page explains how to edit both sections to reflect your own skill set.
+
+## The `SkillNode` Interface
+
+Each entry in the skills array follows this shape:
+
+```typescript
+interface SkillNode {
+  id: number;
+  name: string;   // Technology or skill name
+  x: number;      // Horizontal position as % of container width (0-100)
+  y: number;      // Vertical position as % of container height (0-100)
+  level: string;  // Display string, e.g. "LVL 99"
+}
+```
+
+## Current Skills Data
+
+The six nodes shipped with the portfolio are:
+
+```typescript
+const skills: SkillNode[] = [
+  { id: 1, name: 'React',        x: 20, y: 30, level: 'LVL 99' },
+  { id: 2, name: 'TypeScript',   x: 50, y: 15, level: 'LVL 85' },
+  { id: 3, name: 'Node.js',      x: 80, y: 40, level: 'LVL 75' },
+  { id: 4, name: 'CSS/Tailwind', x: 35, y: 60, level: 'LVL 90' },
+  { id: 5, name: 'PostgreSQL',   x: 70, y: 75, level: 'LVL 70' },
+  { id: 6, name: 'GraphQL',      x: 55, y: 45, level: 'LVL 65' },
+];
+```
+
+<Steps>
+  <Step title="Edit the skills array">
+    Open the Skills page component (Level 4) and find the `skills` array. Replace or add entries to match your own tech stack. Adjust the `x` and `y` values to spread nodes across the constellation container — the component renders at roughly a **3:1 aspect ratio** (wide and short), so distribute nodes horizontally more than vertically to avoid crowding.
+
+    A few guidelines to keep in mind:
+
+    - Leave a margin of roughly 10% on each edge so node labels are not clipped
+    - Try to keep nodes at least 15 percentage units apart to prevent label overlap
+    - No two entries should share the same `id` — it is used as the React `key`
+
+    ```typescript
+    // Example: swapping PostgreSQL for Python
+    { id: 5, name: 'Python', x: 68, y: 72, level: 'LVL 80' },
+    ```
+  </Step>
+
+  <Step title="Update the SVG path">
+    The constellation lines are drawn by a single `<motion.path>` element whose `d` attribute is hardcoded — it is **not** generated automatically from the node positions. The current path visiting all six default nodes in array order is:
+
+    ```jsx
+    <motion.path
+      d="M 20% 30% L 50% 15% L 80% 40% L 55% 45% L 70% 75% L 35% 60% Z"
+      stroke="#b14cff"
+      fill="none"
+    />
+    ```
+
+    **SVG path syntax reference:**
+
+    | Command | Meaning |
+    |---|---|
+    | `M x% y%` | Move to — sets the starting point without drawing a line |
+    | `L x% y%` | Line to — draws a straight line from the current position |
+    | `Z` | Close path — draws a line back to the starting point |
+
+    To update the path after repositioning nodes, rewrite the `d` string so each `x%` and `y%` pair matches the corresponding node's `x` and `y` values. For example, if you have four nodes at `(15, 20)`, `(60, 10)`, `(85, 50)`, and `(40, 70)`, the path would be:
+
+    ```jsx
+    <motion.path
+      d="M 15% 20% L 60% 10% L 85% 50% L 40% 70% Z"
+      stroke="#b14cff"
+      fill="none"
+    />
+    ```
+
+    The path visits nodes in the order they appear in the `d` string, which does not have to match array order — you can arrange the visual connections in any sequence you prefer.
+  </Step>
+
+  <Step title="Set the level strings">
+    The `level` field accepts any string and is shown verbatim in the hover tooltip. The arcade convention throughout the portfolio is `LVL {number}`, where the number reflects your real-world proficiency on a scale up to 99:
+
+    | Range | Suggested meaning |
+    |---|---|
+    | `LVL 90–99` | Expert — daily driver, deep knowledge |
+    | `LVL 70–89` | Proficient — comfortable with most patterns |
+    | `LVL 50–69` | Intermediate — solid fundamentals, still learning |
+    | `LVL 20–49` | Familiar — have used it in projects but not daily |
+
+    You are not constrained to this scale. Labels like `LVL MAX`, `LVL NEW`, or even `★ MASTER` are equally valid if they fit your personal brand.
+  </Step>
+
+  <Step title="Update the tools grid">
+    The "POWER-UPS COLLECTED" section below the constellation is driven by a separate `tools` array. Each entry pairs a **Lucide React** icon component with a display name:
+
+    ```typescript
+    const tools = [
+      { icon: FigmaIcon,       name: 'Figma' },
+      { icon: GitBranchIcon,   name: 'Git' },
+      { icon: DockerIcon,      name: 'Docker' },
+      { icon: DatabaseIcon,    name: 'Redis' },
+      { icon: SmartphoneIcon,  name: 'React Native' },
+      { icon: CloudIcon,       name: 'AWS' },
+    ];
+    ```
+
+    To replace a tool, swap the icon import for another Lucide icon and update the `name` string. Browse the full icon catalogue at [lucide.dev](https://lucide.dev) — import names follow the pattern `{IconName}` from `lucide-react`.
+
+    ```typescript
+    // Example: replacing React Native with Kubernetes
+    import { ContainerIcon } from 'lucide-react';
+
+    { icon: ContainerIcon, name: 'Kubernetes' },
+    ```
+  </Step>
+
+  <Step title="Rebuild">
+    After saving all changes to the skills array, SVG path, and tools array, recompile the bundle:
+
+    ```bash
+    npm run build
+    ```
+
+    Reload the page and navigate to Level 4 to verify that the constellation nodes and connecting lines render in their new positions.
+  </Step>
+</Steps>
+
+---
+
+## Node Position Reference
+
+Use this as a quick guide when planning your layout:
+
+```
+// Suggested node positions for common skill counts
+// 3 skills: spread across top third
+// 6 skills: two rows of 3 (current default)
+// 8 skills: staggered grid
+//
+// Container is roughly 700px × 384px (max-w-3xl × h-96)
+// x: 10-90% (leave margins), y: 10-85%
+```
+
+A rough mental model: the container is about **700 px wide** and **384 px tall** at the `max-w-3xl` breakpoint. One percent on the x-axis is ~7 px; one percent on the y-axis is ~3.8 px. Nodes 15 percentage units apart in x are roughly 105 px apart on screen.
+
+<Warning>
+  The SVG path is **not** auto-generated from node positions. It is a hardcoded `d` attribute on the `<motion.path>` element. If you change a node's `x` or `y` coordinates without also updating the path, the constellation lines will draw to the old coordinates and appear disconnected from the new node positions. Always update the path immediately after repositioning nodes.
+</Warning>
+
+<Tip>
+  Before editing the source file, sketch your constellation layout on paper or in a tool like Figma. Place your nodes roughly where you want them, draw the connecting lines, then read off the approximate percentage coordinates. This is much faster than iterating through build-and-reload cycles to find good positions.
+</Tip>
+
+---
+
+<CardGroup cols={1}>
+  <Card title="Skills Page" icon="star" href="/pages/skills">
+    See how the constellation container, SVG path, node components, and tools grid are structured inside the Level 4 route.
+  </Card>
+</CardGroup>

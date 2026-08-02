@@ -1,0 +1,120 @@
+---
+title: "Level 7 — Contact: Arcade-Style Continue Screen"
+sidebarTitle: "Contact"
+description: "The contact page mimics an arcade continue screen with a coin slot graphic, keyboard-driven initials entry, and a PRESS START TO CONNECT submit button."
+---
+
+The Contact page (`/contact`) is labelled **LEVEL 7: FINAL STAGE** and takes its visual language from the continue screen found in classic arcade cabinets — the moment after your last life is spent when the machine asks "CONTINUE?" and starts counting down. Rather than a generic contact form, the page frames reaching out as the player choosing to keep playing, turning a mundane conversion action into the natural conclusion of the arcade narrative.
+
+## The Coin Slot Cabinet Graphic
+
+Anchoring the left side of the layout is a stylised vertical cabinet graphic that depicts a coin slot. It shows a **"25¢"** denomination label and a **"< INSERT"** directional prompt pointing toward the slot opening. The graphic is built entirely from styled `div` elements — no image assets are used — which means it scales cleanly at any viewport width and inherits the page's dark colour scheme automatically.
+
+The cabinet graphic serves a dual purpose: it signals the "CONTINUE?" metaphor at a glance, and it draws the eye toward the initials entry widget that sits directly beside it.
+
+## Keyboard-Controlled Initials Widget
+
+The standout interactive element on the page is the initials entry widget — a row of three letter slots that reads **[A][A][A]** on load. The active slot is highlighted with a flashing cursor. Visitors navigate it entirely with the keyboard, exactly as they would enter their initials on a high-score screen:
+
+| Key | Action |
+|-----|--------|
+| `ArrowUp` | Cycle the focused letter forward (A → B → … → Z → A) |
+| `ArrowDown` | Cycle the focused letter backward (Z → Y → … → A → Z) |
+| `ArrowRight` | Move cursor to the next slot (max position: 2) |
+| `ArrowLeft` | Move cursor to the previous slot (min position: 0) |
+
+The handler that drives this behaviour reads as follows:
+
+```jsx
+// Arrow key handler (real from source)
+const handleKeyDown = (e) => {
+  if (e.key === 'ArrowUp') {
+    // Cycle current letter up (A→B→...→Z→A)
+    setLetters(prev => {
+      const updated = [...prev];
+      const code = updated[cursorPos].charCodeAt(0);
+      updated[cursorPos] = code === 90 ? 'A' : String.fromCharCode(code + 1);
+      return updated;
+    });
+  } else if (e.key === 'ArrowDown') {
+    // Cycle current letter down (Z→Y→...→A→Z)
+    setLetters(prev => {
+      const updated = [...prev];
+      const code = updated[cursorPos].charCodeAt(0);
+      updated[cursorPos] = code === 65 ? 'Z' : String.fromCharCode(code - 1);
+      return updated;
+    });
+  } else if (e.key === 'ArrowRight') {
+    setCursorPos(pos => Math.min(2, pos + 1));
+  } else if (e.key === 'ArrowLeft') {
+    setCursorPos(pos => Math.max(0, pos - 1));
+  }
+};
+```
+
+State is managed with two `useState` hooks: `letters` (an array of three single-character strings, initialised to `['A', 'A', 'A']`) and `cursorPos` (a number 0–2 tracking which slot is active). The boundary guards (`Math.min(2, …)` and `Math.max(0, …)`) prevent the cursor from moving outside the three available slots.
+
+## Message Textarea & Submit Button
+
+Below the initials widget sits a full-width textarea with a neon-lime placeholder:
+
+```jsx
+<textarea
+  placeholder="> Type your message here..."
+  className="... text-lime-400 placeholder-lime-600 ..."
+/>
+```
+
+The placeholder style (`text-lime-400` / `placeholder-lime-600`) keeps the terminal aesthetic consistent with the rest of the page's green-on-black colour palette.
+
+The form is submitted via a standard button labelled **"PRESS START TO CONNECT"** accompanied by a send icon from Lucide React. The button uses the same pixel-font treatment as the rest of the page and carries a hover glow effect.
+
+The form element itself uses `onSubmit: e.preventDefault()` — no HTTP request is made by default:
+
+```jsx
+<form onSubmit={(e) => e.preventDefault()}>
+  {/* initials widget, textarea, submit button */}
+</form>
+```
+
+<Warning>
+  The contact form is **front-end only**. Pressing "PRESS START TO CONNECT" currently prevents the default browser submission and does nothing further — no email is sent, no data is stored. To make the form functional you must integrate a form handling service or back-end endpoint. Popular zero-infrastructure options for static portfolios include **Formspree**, **EmailJS**, and **Netlify Forms**.
+</Warning>
+
+## Social Links
+
+Beneath the form, a row of icon buttons provides direct links to social profiles. Each button uses a Lucide React icon and lights up with a glow effect on hover:
+
+<CardGroup cols={3}>
+  <Card title="GitHub" icon="github">
+    Links to the developer's GitHub profile. Uses the Lucide `Github` icon.
+  </Card>
+  <Card title="Twitter / X" icon="twitter">
+    Links to the developer's Twitter or X profile. Uses the Lucide `Twitter` icon.
+  </Card>
+  <Card title="LinkedIn" icon="linkedin">
+    Links to the developer's LinkedIn profile. Uses the Lucide `Linkedin` icon.
+  </Card>
+</CardGroup>
+
+The icon buttons share a consistent style: dark background, coloured border, and a neon glow `box-shadow` that intensifies on `:hover` — matching the button treatment used throughout the rest of Dev Arcade.
+
+<Tip>
+  **Formspree** is a good first choice for wiring up the contact form without a back end. Create a free form at [formspree.io](https://formspree.io), then replace the `onSubmit` handler with a `fetch` POST to your form endpoint:
+
+  ```jsx
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await fetch('https://formspree.io/f/<YOUR_FORM_ID>', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        initials: letters.join(''),
+        message: messageValue,
+      }),
+    });
+  };
+  ```
+
+  Formspree forwards submissions to your email address and offers a spam filter, submission dashboard, and custom redirect — all without deploying any server-side code.
+</Tip>

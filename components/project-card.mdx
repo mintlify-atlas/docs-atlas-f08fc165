@@ -1,0 +1,99 @@
+---
+title: "ProjectCard: Arcade Cartridge Display Component"
+sidebarTitle: "Project Card"
+description: "ProjectCard renders a project as a retro arcade game cartridge with 3D hover tilt, a type badge, tech stack display, and LOAD GAME / VIEW SOURCE actions."
+---
+
+`ProjectCard` turns each entry in the projects data array into a physical arcade game cartridge rendered entirely in JSX. The card is shaped like a classic cartridge — contact pins at the top, a screen-like gradient area in the middle, and a yellow label strip at the bottom — and responds to hover with a Framer Motion 3D tilt that reinforces the tactile metaphor. It is used by the Projects page to render the full cartridge inventory grid.
+
+## Props
+
+The component accepts a single `project` object prop. All fields are required.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `project.id` | `number` | Yes | Unique identifier for the project entry |
+| `project.title` | `string` | Yes | Displayed in arcade font (`font-arcade`), all caps |
+| `project.type` | `string` | Yes | Category badge — e.g. `"APP"`, `"ECOMMERCE"`, `"DASHBOARD"`, `"SOCIAL"` |
+| `project.desc` | `string` | Yes | Short description shown in the screen area below the title |
+| `project.tech` | `string` | Yes | Tech stack displayed with the `TECH: ` prefix in electric purple |
+| `project.sampleData` | `boolean` | Yes | When `true`, renders a yellow "DEMO USES SAMPLE DATA" warning badge |
+
+## Visual anatomy
+
+A `ProjectCard` is composed of five stacked regions that together read as a single retro cartridge object.
+
+### 1. Cartridge teeth
+
+Five narrow gray pins sit at the very top of the card, rendered as a flex row of `div` elements. They are purely decorative — a reference to the physical contact edge of a Game Boy or SNES cartridge.
+
+### 2. Screen area
+
+The central region uses a vertical gradient from `purple-deep` to the `arcade` background color, bordered in `purple-electric`. This is where the majority of the project information lives: the type badge, title, description, and tech stack.
+
+### 3. Type badge
+
+Pinned to the top-right corner of the screen area, the badge shows `project.type` in white text on a `magenta-hot` background. Its bottom-left corner is rounded to suggest a sticker peeling off the screen.
+
+### 4. Label strip
+
+A thin yellow (`bg-yellow-600`) band at the bottom of the card mimics the paper label on a real cartridge. Ten evenly spaced tick marks in a lighter yellow run across it for texture.
+
+### 5. Hover overlay
+
+An absolutely-positioned overlay covers the entire card on hover. It fades in via a CSS `transition-opacity` and presents two action buttons: **LOAD GAME** (lime-neon background) and **VIEW SOURCE** (electric-purple background). The overlay sits at `z-20` so it renders above all cartridge content.
+
+## 3D hover animation
+
+The card uses Framer Motion's `whileHover` prop combined with a CSS `perspective` to produce a 3D tilt effect:
+
+```jsx
+<motion.div
+  whileHover={{ rotateX: 15, rotateY: -10, scale: 1.05 }}
+  style={{ perspective: 1000 }}
+>
+```
+
+When the cursor enters the card, it rotates 15° toward the viewer on the X axis, tilts 10° to the left on the Y axis, and scales up to 105% of its original size. The `perspective: 1000` style value controls the depth of the 3D effect — lower numbers produce more dramatic distortion, higher numbers flatten the tilt.
+
+## Usage
+
+```jsx
+const retroDash = {
+  id: 1,
+  title: "RETRO.DASH",
+  type: "DASHBOARD",
+  desc: "A pixel-art analytics dashboard with live chart animations and a full dark-mode arcade theme.",
+  tech: "React · Recharts · Tailwind",
+  sampleData: true,
+};
+
+function ProjectsGrid() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <ProjectCard project={retroDash} />
+    </div>
+  );
+}
+```
+
+When `sampleData` is `true`, as in the example above, a yellow badge reading `DEMO USES SAMPLE DATA` appears in the lower portion of the screen area, signalling to visitors that the live demo is not connected to real data.
+
+<Note>
+  The **LOAD GAME** and **VIEW SOURCE** buttons in the hover overlay currently have no `href` or `onClick` handlers — they are visual placeholders. To make them functional, add `liveUrl` and `sourceUrl` string fields to each project object in your data file, then wire them up inside the overlay:
+
+  ```jsx
+  <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
+    <button className="font-arcade text-sm bg-lime-neon text-arcade px-4 py-3">
+      LOAD GAME
+    </button>
+  </a>
+  <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer">
+    <button className="font-arcade text-sm bg-purple-electric text-white px-4 py-3">
+      VIEW SOURCE
+    </button>
+  </a>
+  ```
+</Note>
+
+For guidance on adding new projects to the data array, see [Adding Projects](/customization/adding-projects). To understand how the Projects page lays out the grid of cards, see the [Projects page reference](/pages/projects).

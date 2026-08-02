@@ -1,0 +1,99 @@
+---
+title: "Level 2 — About: Player Profile Stats Screen"
+sidebarTitle: "About"
+description: "The About page renders a gamified player profile with RPG-style stats, an experience timeline, and a currently-equipped tools sidebar."
+---
+
+The About page transforms the conventional developer bio into an RPG character sheet. Titled **"LEVEL 2: PLAYER PROFILE"**, it presents the portfolio owner's identity, skills, and career history through the visual language of a classic role-playing game stat screen — complete with attribute bars, an experience log, and an equipment sidebar. Like every other page in Dev Arcade, it is wrapped in `LevelLayout`, so visitors see the familiar 800 ms boot animation before the content fades in.
+
+## Player Profile Card
+
+At the top of the page sits the main profile card. It mimics the character-select or status-screen cards found in arcade RPGs: a portrait area on the left (avatar image or pixel-art placeholder), the owner's name and "class" (job title/role) prominently displayed, and a row of quick-stat chips across the bottom. The card's visual styling uses arcade-style borders, pixel-corner decorations, and neon text to keep it thematically consistent with the rest of the portfolio.
+
+<CardGroup cols={3}>
+  <Card title="Profile Portrait" icon="user-astronaut">
+    An avatar image or pixel-art placeholder occupies the left side of the card, representing the "player character."
+  </Card>
+  <Card title="Name & Class" icon="id-badge">
+    The owner's name and role/title are displayed in large arcade font, equivalent to a character name and job class in an RPG.
+  </Card>
+  <Card title="Quick-Stat Chips" icon="chart-bar">
+    Small inline chips below the name surface key attributes at a glance before the visitor scrolls to the full PLAYER STATS section.
+  </Card>
+</CardGroup>
+
+## PLAYER STATS Section
+
+Below the profile card, the **PLAYER STATS** section renders a set of RPG-style attribute bars — one per technical skill. Each bar shows the skill name on the left (e.g., `REACT`, `TYPESCRIPT`) and a filled progress bar on the right whose width reflects relative proficiency. This gives technical depth at a glance without resorting to a plain bullet-point list.
+
+The attributes currently tracked in the stats section include core frontend technologies (React, TypeScript) alongside any additional skills defined in the data source. Each stat row follows a consistent structure:
+
+```typescript
+interface PlayerStat {
+  name: string;   // Displayed label, e.g. "REACT"
+  value: number;  // 0–100, drives the width of the progress bar
+}
+```
+
+<Tip>
+  To add or adjust a stat, update the stats data array in the About page source. Increment or decrement the `value` field to change how filled the progress bar appears. Values should stay in the 0–100 range.
+</Tip>
+
+## EXP (Experience) Timeline
+
+The **EXP** section displays the portfolio owner's professional and educational history as a scrollable vertical timeline — styled like an in-game experience log or quest history. Each entry in the timeline represents a role, project, or milestone, and is presented with:
+
+- **Date range** — shown in a neon accent color on the left rail
+- **Title / Organization** — the role name and company or institution
+- **Description** — a short summary of responsibilities or achievements
+
+The timeline reads chronologically from oldest to newest (bottom to top, mirroring how XP accumulates in a game), though the visual order in the DOM is top-to-bottom for accessibility.
+
+```typescript
+interface ExpEntry {
+  dateRange: string;    // e.g. "2021 – PRESENT"
+  title: string;        // Job title or degree name
+  organization: string; // Company or institution
+  description: string;  // Short summary of the role/achievement
+}
+```
+
+<Steps>
+  <Step title="Locate the Experience Data Array">
+    Open the About page source file and find the array that populates the EXP timeline. Each object in the array maps to one timeline entry.
+  </Step>
+  <Step title="Add a New Entry">
+    Append a new object to the array with `dateRange`, `title`, `organization`, and `description` fields filled in for your most recent role or qualification.
+  </Step>
+  <Step title="Remove Placeholder Entries">
+    Delete any placeholder or sample entries that shipped with the template so only your real history is displayed.
+  </Step>
+</Steps>
+
+## CURRENTLY EQUIPPED Sidebar
+
+On wider viewports, the right side of the About page displays a **"CURRENTLY EQUIPPED"** sidebar — a nod to RPG equipment or inventory screens. It surfaces the tools and environment the developer actively uses day-to-day: editor, OS, terminal, preferred frameworks, and so on. Each item is shown as a labeled icon chip, reinforcing the "equipped loadout" metaphor.
+
+<CardGroup cols={2}>
+  <Card title="What to Include" icon="toolbox">
+    List tools you actively reach for every day — your editor (VS Code, Neovim, etc.), shell, browser DevTools extensions, or favourite libraries. Avoid listing anything you only used once.
+  </Card>
+  <Card title="How to Update" icon="pencil">
+    Find the equipped-tools data array in the About page source and replace placeholder entries with your own tool names and icon references.
+  </Card>
+</CardGroup>
+
+## Wrapping in `LevelLayout`
+
+The About page is wrapped in `LevelLayout` with `levelName="LEVEL 2: PLAYER PROFILE"`. This produces the level-title heading at the top of the page and plays the standard 800 ms loading animation on every visit or navigation event, consistent with the rest of the Dev Arcade experience.
+
+```jsx
+// Simplified representation of how LevelLayout is used on the About page
+<LevelLayout levelName="LEVEL 2: PLAYER PROFILE">
+  {/* Profile card, PLAYER STATS, EXP timeline, and sidebar live here */}
+</LevelLayout>
+```
+
+<Note>
+  All text on the About page is intentionally uppercase to match the arcade aesthetic. When editing bio copy or timeline descriptions, write your content in plain mixed-case — the CSS `text-transform: uppercase` rule handles the visual conversion automatically so you don't have to shout in your source files.
+</Note>

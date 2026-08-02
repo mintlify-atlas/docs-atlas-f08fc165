@@ -1,0 +1,136 @@
+---
+title: "Level 4 — Skills: Interactive Constellation Map"
+sidebarTitle: "Skills"
+description: "The Skills page renders an interactive star-map with animated SVG paths connecting skill nodes, and a tools grid below for additional power-ups."
+---
+
+The Skills page closes out the Dev Arcade experience with a cosmic twist, presenting your technical skills as a navigable star map. Titled **"LEVEL 4: SKILL TREE"** and headlined **"CONSTELLATION MAP"** inside the page, it draws an animated SVG path that connects glowing skill nodes — each one a pulsing lime-neon dot positioned at percentage-based coordinates across the canvas. Below the constellation, a **"POWER-UPS COLLECTED"** grid surfaces supplementary tools and platforms the developer has in their arsenal. Like every other level, the page is wrapped in `LevelLayout` for the standard 800 ms boot animation.
+
+## Constellation Map
+
+The constellation map is an SVG canvas that fills the available width of the page. Two layers render on top of each other:
+
+1. **Connecting path** — a single `<path>` element that draws a continuous line through all skill node positions in order of their `id`. The path is styled with a purple stroke and animates from `pathLength: 0` to `pathLength: 1` on mount using Framer Motion.
+2. **Skill nodes** — a `<circle>` element (or equivalent `motion` component) for each skill, rendered at its `(x, y)` percentage position. Each node pulses with a lime-neon glow animation to simulate a twinkling star.
+
+### SVG Path Animation
+
+The connecting path is driven by Framer Motion's `animate` prop on a `motion.path` element. It starts invisible (zero drawn length) and traces itself to completion over **2 seconds**, giving the impression that the constellation is being drawn in real time as the page loads.
+
+```typescript
+// Framer Motion animation configuration for the constellation path
+const pathVariants = {
+  hidden: { pathLength: 0 },
+  visible: {
+    pathLength: 1,
+    transition: { duration: 2, ease: "easeInOut" },
+  },
+};
+
+// Applied as:
+// <motion.path
+//   variants={pathVariants}
+//   initial="hidden"
+//   animate="visible"
+//   stroke="purple"
+//   ...
+// />
+```
+
+<Note>
+  The path connects nodes in ascending `id` order. If you add new skills, assign `id` values that reflect the order in which you want them connected — the path will automatically trace through them in sequence.
+</Note>
+
+## Skill Node Data Structure
+
+Each point on the constellation map is defined by a `SkillNode` object:
+
+```typescript
+interface SkillNode {
+  id: number;
+  name: string;   // Skill/technology name
+  x: number;      // Horizontal position as percentage (0–100)
+  y: number;      // Vertical position as percentage (0–100)
+  level: string;  // Display level string, e.g. "LVL 99"
+}
+```
+
+The `x` and `y` values are interpreted as CSS percentages within the SVG viewport, so `x: 50, y: 50` places a node at the exact center of the canvas regardless of screen size.
+
+### Current Skills
+
+The six skill nodes shipped with Dev Arcade are:
+
+```typescript
+const skills: SkillNode[] = [
+  { id: 1, name: "React",        x: 20, y: 30, level: "LVL 99" },
+  { id: 2, name: "TypeScript",   x: 50, y: 15, level: "LVL 85" },
+  { id: 3, name: "Node.js",      x: 80, y: 40, level: "LVL 75" },
+  { id: 4, name: "CSS/Tailwind", x: 35, y: 60, level: "LVL 90" },
+  { id: 5, name: "PostgreSQL",   x: 70, y: 75, level: "LVL 70" },
+  { id: 6, name: "GraphQL",      x: 55, y: 45, level: "LVL 65" },
+];
+```
+
+## Hover Tooltips
+
+When a visitor hovers over any skill node, a popup tooltip appears adjacent to the dot showing:
+
+- **Skill name** — the `name` field in arcade uppercase typography
+- **Level** — the `level` string (e.g., `LVL 99`) styled in lime-neon color
+
+The tooltip disappears when the cursor leaves the node, keeping the canvas uncluttered until the visitor actively explores it.
+
+<Tip>
+  Level strings are purely cosmetic — they convey confidence and relative proficiency at a glance. Use honest values that reflect your real experience: `LVL 99` for daily-use core skills, lower values for tools you use occasionally or are still learning.
+</Tip>
+
+## POWER-UPS COLLECTED (Tools Grid)
+
+Below the constellation map, the **"POWER-UPS COLLECTED (TOOLS)"** section displays a grid of supplementary tools and platforms. These are technologies that complement the starred skills but don't need their own constellation node — think package managers, design tools, cloud providers, and runtimes.
+
+The six tools included in the default setup are:
+
+<CardGroup cols={3}>
+  <Card title="Figma" icon="pen-nib">
+    UI/UX design and prototyping tool used for wireframing and component design.
+  </Card>
+  <Card title="Git" icon="code-branch">
+    Version control system for tracking changes and collaborating on codebases.
+  </Card>
+  <Card title="Docker" icon="box">
+    Containerisation platform for building and shipping consistent environments.
+  </Card>
+  <Card title="Redis" icon="database">
+    In-memory data store used for caching, session management, and pub/sub messaging.
+  </Card>
+  <Card title="React Native" icon="mobile">
+    Framework for building cross-platform mobile applications with React.
+  </Card>
+  <Card title="AWS" icon="cloud">
+    Cloud infrastructure platform covering compute, storage, and managed services.
+  </Card>
+</CardGroup>
+
+## Customizing Your Skills
+
+<Steps>
+  <Step title="Update the Skills Array">
+    Open the Skills page source and locate the `skills` array. Edit the `name`, `level`, and position (`x`, `y`) fields of existing entries to match your own proficiencies.
+  </Step>
+  <Step title="Add New Skill Nodes">
+    Append a new `SkillNode` object to the array with a unique `id`. Choose `x` and `y` percentage values that spread the new node across open space in the canvas — avoid clustering nodes too close together or the path will overlap their labels.
+  </Step>
+  <Step title="Remove Placeholder Skills">
+    Delete any skills from the array that don't apply to you. The SVG path automatically redraws through whatever nodes remain.
+  </Step>
+  <Step title="Update the Tools Grid">
+    Find the power-ups data array (separate from the `skills` array) and replace placeholder tool entries with your own. Each entry typically includes a display name and an icon reference.
+  </Step>
+</Steps>
+
+<Warning>
+  Placing two skill nodes too close together (within ~10 percentage units of each other) can cause their hover tooltips to overlap. If you add many skills, spread them across the full 0–100 range on both axes to keep the map readable.
+</Warning>
+
+For a step-by-step guide to repositioning nodes and adding new skills, see the [Updating Skills customization guide](/customization/updating-skills).

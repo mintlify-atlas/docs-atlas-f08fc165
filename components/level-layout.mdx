@@ -1,0 +1,97 @@
+---
+title: "LevelLayout: Arcade Loading Screen Wrapper"
+sidebarTitle: "LevelLayout"
+description: "LevelLayout wraps every page in Dev Arcade with an 800ms loading animation and smooth content entrance. Pass a levelName to brand each level's loader."
+---
+
+`LevelLayout` is the universal page wrapper used by all seven route components in Dev Arcade. It provides two things: an arcade-styled loading screen that plays for 800ms on every page mount, and a smooth fade-plus-slide-up entrance animation for the page content that follows. Every route in the app delegates its loading state and entrance choreography entirely to this component, keeping individual pages clean and focused on their own markup.
+
+## Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `children` | `ReactNode` | Yes | Page content shown after loading completes |
+| `levelName` | `string` | Yes | Level name displayed in the loading screen beneath `LOADING...` |
+
+## Source
+
+```jsx
+function LevelLayout({ children, levelName }) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="flex flex-col items-center justify-center h-[60vh] space-y-8"
+      >
+        <h2 className="font-arcade text-lime-neon text-2xl animate-pulse text-center leading-loose">
+          LOADING...<br />{levelName}
+        </h2>
+        <div className="w-64 h-6 border-4 border-purple-deep p-1">
+          <motion.div
+            initial={{ width: '0%' }}
+            animate={{ width: '100%' }}
+            transition={{ duration: 0.7, ease: 'linear' }}
+            className="h-full bg-magenta-hot"
+          />
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+## Behavior
+
+`LevelLayout` operates in two sequential phases whenever a page mounts.
+
+### Phase 1 — Loading screen (0–800ms)
+
+As soon as the component mounts, a `setTimeout` fires an 800ms countdown. During this window the component renders a centered loading screen that contains:
+
+- A pulsing `LOADING...` headline (using the `animate-pulse` utility) followed by a line break and the `levelName` string — for example, `LOADING... / LEVEL 3: CARTRIDGE INVENTORY`.
+- A magenta progress bar (`bg-magenta-hot`) that animates its width from `0%` to `100%` linearly over 700ms, giving visitors a satisfying near-complete bar just before the content appears.
+
+The loading screen itself fades in from `opacity: 0` on mount and fades out to `opacity: 0` on exit — transitions handled by Framer Motion's `AnimatePresence` at the router level.
+
+### Phase 2 — Content entrance (after 800ms)
+
+Once the timer fires, `isLoading` is set to `false`. React unmounts the loading screen and mounts the `children` inside a `motion.div` that starts at `opacity: 0, y: 20` and animates to `opacity: 1, y: 0` over 400ms. The combined effect is a gentle fade-and-rise that feels natural after the loading screen departs.
+
+## Usage
+
+```jsx
+function MyPage() {
+  return (
+    <LevelLayout levelName="LEVEL 3: CARTRIDGE INVENTORY">
+      <h1>Page content here</h1>
+    </LevelLayout>
+  );
+}
+```
+
+Wrap the entire JSX tree that makes up a page in a single `LevelLayout`. The `levelName` string appears verbatim in the loading headline, so keep it short, uppercase, and in the `LEVEL N: SUBTITLE` convention used by the existing pages.
+
+<Note>
+  The 800ms delay is intentional — it's what gives Dev Arcade its retro "inserting a cartridge" feel. If you need to shorten or lengthen it, update the first argument to `setTimeout` inside the `useEffect` in `LevelLayout`. The progress bar's `duration` (currently `0.7`) is a separate value and should be adjusted to stay slightly shorter than the new timer value so the bar visually "completes" just before the content appears.
+</Note>
+
+For a deeper look at how `LevelLayout`'s `motion.div` fits into the router-level `AnimatePresence` wrapper and the overall transition sequence, see the [Animations architecture guide](/architecture/animations).

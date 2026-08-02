@@ -1,0 +1,150 @@
+---
+title: "Level 3 — Projects: Cartridge Inventory Grid"
+sidebarTitle: "Projects"
+description: "Browse and filter projects displayed as arcade game cartridges. Each card features 3D hover effects, a type badge, and LOAD GAME / VIEW SOURCE actions."
+---
+
+The Projects page presents your portfolio work as a collection of arcade game cartridges in an inventory screen, headlined **"LEVEL 3: CARTRIDGE INVENTORY"**. A row of filter tabs at the top lets visitors narrow the grid by project category, and each cartridge card springs to life with a 3D tilt effect on hover, revealing a **LOAD GAME** button (live demo) and a **VIEW SOURCE** button (repository link). The heading displayed inside the page is **"SELECT CARTRIDGE"**, echoing the classic arcade prompt to choose your game.
+
+## Filter Tabs
+
+Five filter tabs sit above the cartridge grid, allowing visitors to browse by category at a glance. Selecting a tab instantly filters the cards to show only matching projects; selecting **ALL** restores the full grid. The active tab is highlighted with the primary neon accent color.
+
+| Tab Label | Filters for `type` value |
+|-----------|--------------------------|
+| ALL | Shows every project |
+| APP | `"APP"` |
+| ECOMMERCE | `"ECOMMERCE"` |
+| DASHBOARD | `"DASHBOARD"` |
+| SOCIAL | `"SOCIAL"` |
+
+## Project Data Structure
+
+Each project in the cartridge inventory is defined by a plain object conforming to the following interface:
+
+```typescript
+interface Project {
+  id: number;
+  title: string;      // Displayed in arcade font, all caps
+  type: string;       // Category: "APP" | "ECOMMERCE" | "DASHBOARD" | "SOCIAL"
+  desc: string;       // Short description shown on the card
+  tech: string;       // Tech stack shown as "TECH: ..."
+  sampleData: boolean; // Shows demo data warning badge if true
+}
+```
+
+### Current Projects
+
+The four projects shipped with Dev Arcade are:
+
+```typescript
+const projects: Project[] = [
+  {
+    id: 1,
+    title: "RETRO.DASH",
+    type: "DASHBOARD",
+    desc: "Analytics dashboard with retro CRT display.",
+    tech: "React, D3.js",
+    sampleData: false,
+  },
+  {
+    id: 2,
+    title: "COIN.SHOP",
+    type: "ECOMMERCE",
+    desc: "Pixel art themed e-commerce storefront.",
+    tech: "Next.js, Stripe",
+    sampleData: true,
+  },
+  {
+    id: 3,
+    title: "DATA.QUEST",
+    type: "DASHBOARD",
+    desc: "RPG-styled data visualization tool.",
+    tech: "Vue, D3.js",
+    sampleData: true,
+  },
+  {
+    id: 4,
+    title: "PIXEL.CHAT",
+    type: "SOCIAL",
+    desc: "WebSocket based retro chat room.",
+    tech: "Socket.io, React",
+    sampleData: false,
+  },
+];
+```
+
+## ProjectCard Layout
+
+Every cartridge card is shaped like a game cartridge and contains the following elements, from top to bottom:
+
+<CardGroup cols={2}>
+  <Card title="Type Badge" icon="tag">
+    Positioned in the top-right corner of the card with a magenta background. Displays the project's `type` string (e.g., `DASHBOARD`, `SOCIAL`) in uppercase.
+  </Card>
+  <Card title="Project Title" icon="font">
+    Rendered in the primary arcade font in **lime-neon** color. Always displayed in all caps, sourced directly from the `title` field.
+  </Card>
+  <Card title="Description" icon="align-left">
+    A short prose description sourced from the `desc` field, displayed in a smaller secondary font beneath the title.
+  </Card>
+  <Card title="Tech Stack" icon="code">
+    The `tech` field is displayed with the prefix `TECH: ` — for example, `TECH: React, D3.js` — so the stack is immediately scannable.
+  </Card>
+</CardGroup>
+
+### Demo Data Warning Badge
+
+When a project's `sampleData` field is `true`, the card displays a yellow **"DEMO USES SAMPLE DATA"** warning badge. This badge signals to visitors that the live demo is running against mock or generated data rather than real production data, so they know not to draw conclusions from the numbers they see.
+
+<Warning>
+  Set `sampleData: true` on any project whose live demo does not connect to a real data source. Omitting this flag on a demo-only project can mislead visitors into thinking the data is live.
+</Warning>
+
+## 3D Hover Effect
+
+`ProjectCard` uses **Framer Motion**'s `motion.div` with a `whileHover` animation to create a tactile 3D tilt effect when the user hovers over a card. The effect is configured with a `perspective` of `1000px` on the parent container.
+
+```typescript
+// Framer Motion whileHover configuration on ProjectCard
+const hoverAnimation = {
+  rotateX: 15,
+  rotateY: -10,
+  scale: 1.05,
+};
+
+// Applied as:
+// <motion.div style={{ perspective: 1000 }} whileHover={hoverAnimation}>
+```
+
+While the card is in its tilted hover state, an overlay slides in that reveals two action buttons:
+
+- **LOAD GAME** — lime-colored button that opens the live demo URL
+- **VIEW SOURCE** — purple-colored button that opens the source code repository
+
+<Tip>
+  The `perspective: 1000` value controls how dramatic the 3D depth looks. A smaller number (e.g., `600`) produces a more exaggerated tilt; a larger number (e.g., `1500`) makes it more subtle. Adjust to taste in the `ProjectCard` component.
+</Tip>
+
+## Adding Your Own Projects
+
+To replace the sample cartridges with your real projects, follow the steps below.
+
+<Steps>
+  <Step title="Open the Projects Data Array">
+    Locate the `projects` array in the Projects page source file. Each object in the array renders as one cartridge card.
+  </Step>
+  <Step title="Add a New Project Object">
+    Append a new object following the `Project` interface above. Assign a unique incremental `id`, set the correct `type` to ensure the filter tabs work, and write a concise `desc` (one sentence is ideal for the card layout).
+  </Step>
+  <Step title="Set the sampleData Flag">
+    If your project's live demo uses mock data, set `sampleData: true` to display the warning badge. For projects with real live data or no demo, set `sampleData: false`.
+  </Step>
+  <Step title="Wire Up the Action Buttons">
+    In the `ProjectCard` component, map each project's `id` to its live-demo URL and repository URL so the **LOAD GAME** and **VIEW SOURCE** buttons route correctly.
+  </Step>
+</Steps>
+
+For a full walkthrough, see the [Adding Projects customization guide](/customization/adding-projects).
+
+For full `ProjectCard` component props and styling reference, see the [ProjectCard component reference](/components/project-card).

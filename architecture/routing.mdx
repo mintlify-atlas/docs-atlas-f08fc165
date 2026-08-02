@@ -1,0 +1,85 @@
+---
+title: "Hash-Based Routing in Dev Arcade"
+sidebarTitle: "Routing"
+description: "Dev Arcade uses React Router DOM's HashRouter with seven routes. Learn how hash URLs enable static hosting without server-side redirect rules."
+---
+
+Dev Arcade uses `HashRouter` from React Router DOM, which means every URL in the application is prefixed with a `#` fragment — for example, `https://example.com/#/projects`. Because the fragment portion of a URL is never sent to the server, any static host serves the same root `index.html` (or the matching `pages/*.html` file) regardless of which route the user navigates to. This lets the portfolio deploy to GitHub Pages, Netlify, or Vercel without writing a single server-side redirect rule.
+
+## Route Definitions
+
+The application defines seven routes, each mapped to a dedicated React component and given an in-universe "level" name that reinforces the arcade theme throughout the UI.
+
+| Path | Component | Level |
+|------|-----------|-------|
+| `/` | Home | Level 1: Character Select |
+| `/about` | About | Level 2: Player Profile |
+| `/projects` | Projects | Level 3: Cartridge Inventory |
+| `/skills` | Skills | Level 4: Skill Tree |
+| `/writing` | Writing | Level 5: Strategy Guides |
+| `/case-studies` | Case Studies | Level 6: Boss Rush |
+| `/contact` | Contact | Level 7: Final Stage |
+
+## Static Entry Point Redirect Pattern
+
+Each file in the `pages/` directory is a thin HTML shell that loads the same compiled bundle as `index.html` but pre-sets the target hash route via an inline script. Here is the entry point for the About page as a representative example.
+
+```html pages/About.html
+<script>
+  window.__STATIC_PAGE_ROUTE__ = "/about";
+  (function () {
+    if (!window.location.hash || window.location.hash === "#") {
+      window.location.replace(
+        window.location.pathname +
+        window.location.search +
+        "#/about"
+      );
+    }
+  })();
+</script>
+```
+
+When a user navigates directly to `/about` — by refreshing the page or following a shared link — the static host serves `pages/About.html`. The inline script runs immediately, before React mounts. It checks whether the browser's current URL already contains a hash fragment; if it does not (or if it contains only a bare `#`), it calls `window.location.replace` to append `#/about`. React Router's `HashRouter` then reads `#/about` from the URL, matches it against the route table, and renders the About component as normal.
+
+<Note>
+  `window.location.replace` is used instead of `window.location.assign` or a direct `href` assignment so that the redirect does not create an extra entry in the browser's history stack. The user can still press Back to return to wherever they came from.
+</Note>
+
+## AnimatePresence and Route Transitions
+
+Route changes are wrapped in Framer Motion's `AnimatePresence` with `mode="wait"`. This configuration tells Framer Motion to let the currently rendered page finish its exit animation before mounting the incoming page. Without `mode="wait"`, both the exiting and entering components would animate simultaneously, causing visual overlap.
+
+```jsx
+<AnimatePresence mode="wait">
+  <Routes location={location} key={location.pathname}>
+    <Route path="/" element={<Home />} />
+    <Route path="/about" element={<About />} />
+    <Route path="/projects" element={<Projects />} />
+    <Route path="/skills" element={<Skills />} />
+    <Route path="/writing" element={<Writing />} />
+    <Route path="/case-studies" element={<CaseStudies />} />
+    <Route path="/contact" element={<Contact />} />
+  </Routes>
+</AnimatePresence>
+```
+
+The `key={location.pathname}` prop on `<Routes>` is essential — it tells React to treat each pathname as a distinct component instance, which triggers the unmount/mount cycle that `AnimatePresence` listens for to fire exit and entrance animations.
+
+## Adding a New Route
+
+Follow all four steps in order. Skipping any one of them will either break static hosting or leave the new route unreachable from a direct URL.
+
+<Steps>
+  <Step title="Create the React component">
+    Add your new page component file to the project. It should be wrapped in `LevelLayout` (or your preferred layout wrapper) and export a default React component.
+  </Step>
+  <Step title="Add a Route entry">
+    Import the new component and add a `<Route path="/your-path" element={<YourComponent />} />` entry inside the `<Routes>` block, alongside the existing seven routes.
+  </Step>
+  <Step title="Create the pages/ HTML file">
+    Copy any existing file from `pages/` (e.g., `pages/About.html`) and update the `window.__STATIC_PAGE_ROUTE__` value and both occurrences of the route path string to match your new path.
+  </Step>
+  <Step title="Register the entry point with Vite">
+    Add the new HTML file to `build.rollupOptions.input` in `vite.config.js` so that Vite includes it in the production build output. Without this step, the file will not be present in the `dist/` directory and static hosts will return a 404 for direct visits.
+  </Step>
+</Steps>

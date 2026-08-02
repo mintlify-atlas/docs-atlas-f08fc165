@@ -1,0 +1,138 @@
+---
+title: "Tailwind CSS Configuration in Dev Arcade"
+sidebarTitle: "Tailwind Config"
+description: "Dev Arcade extends Tailwind CSS with a custom color palette, three pixel font families, and keyframe animations. Learn the full configuration structure."
+---
+
+Dev Arcade extends Tailwind CSS in three meaningful ways: a six-token neon color palette that defines every surface and accent in the UI, a trio of pixel and monospace font families mapped to short utility classes, and two custom keyframe animations — a drifting star field and a horizontal marquee — that power the app's ambient motion. All of these extensions live in `tailwind.config.js` under `theme.extend`, so they stack on top of Tailwind's defaults without replacing them.
+
+## Full Configuration
+
+The complete `tailwind.config.js`, reconstructed from the compiled CSS output:
+
+```js tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        arcade: '#07060d',
+        'purple-deep': '#1a0b2e',
+        'purple-electric': '#b14cff',
+        'magenta-hot': '#ff3df0',
+        'lime-neon': '#b6ff3c',
+        'text-offwhite': '#f4f1ff',
+      },
+      fontFamily: {
+        arcade: ['"Press Start 2P"', 'cursive'],
+        pixel: ['VT323', 'monospace'],
+        mono: ['Space Mono', 'monospace'],
+      },
+      keyframes: {
+        stars: {
+          '0%': { backgroundPosition: '0 0' },
+          '100%': { backgroundPosition: '0 1000px' },
+        },
+        marquee: {
+          '0%': { transform: 'translate(100%)' },
+          '100%': { transform: 'translate(-100%)' },
+        },
+      },
+      animation: {
+        stars: 'stars 100s linear infinite',
+        marquee: 'marquee 20s linear infinite',
+      },
+    },
+  },
+  plugins: [],
+};
+```
+
+## Configuration Sections
+
+### `content` — Purge Paths
+
+```js tailwind.config.js
+content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+```
+
+This tells Tailwind which files to scan for class names when building for production. Any utility class that appears in a file matched by these globs is included in the output CSS; everything else is purged. If you add new source directories (e.g., `./scripts/**/*.ts`), add them here to prevent those classes from being stripped.
+
+### `colors` — Neon Palette
+
+```js tailwind.config.js
+colors: {
+  arcade: '#07060d',
+  'purple-deep': '#1a0b2e',
+  'purple-electric': '#b14cff',
+  'magenta-hot': '#ff3df0',
+  'lime-neon': '#b6ff3c',
+  'text-offwhite': '#f4f1ff',
+},
+```
+
+Each entry generates the full suite of Tailwind color utilities: `bg-arcade`, `text-arcade`, `border-arcade`, `ring-arcade`, and so on. Because these are defined under `extend`, they sit alongside Tailwind's built-in palette (grays, blues, etc.) rather than replacing it. See the [Colors](/customization/colors) page for the full palette reference and swap instructions.
+
+### `fontFamily` — Pixel Typefaces
+
+```js tailwind.config.js
+fontFamily: {
+  arcade: ['"Press Start 2P"', 'cursive'],
+  pixel: ['VT323', 'monospace'],
+  mono: ['Space Mono', 'monospace'],
+},
+```
+
+These three entries create `font-arcade`, `font-pixel`, and `font-mono` utility classes. The fonts themselves are loaded from Google Fonts via an `@import` in the global CSS file — the config only maps the class names to font-family stacks. See the [Fonts](/customization/fonts) page for loading details and swap instructions.
+
+### `keyframes` & `animation` — Ambient Motion
+
+```js tailwind.config.js
+keyframes: {
+  stars: {
+    '0%': { backgroundPosition: '0 0' },
+    '100%': { backgroundPosition: '0 1000px' },
+  },
+  marquee: {
+    '0%': { transform: 'translate(100%)' },
+    '100%': { transform: 'translate(-100%)' },
+  },
+},
+animation: {
+  stars: 'stars 100s linear infinite',
+  marquee: 'marquee 20s linear infinite',
+},
+```
+
+Two custom animations ship with the app:
+
+- **`animate-stars`** — Scrolls a radial-gradient star field downward over 100 seconds in a seamless infinite loop, used on the `.starfield` background layer.
+- **`animate-marquee`** — Slides an element from fully off-screen right to fully off-screen left over 20 seconds, used for scrolling ticker text.
+
+Both are registered in `animation` so they can be applied as single utility classes (`animate-stars`, `animate-marquee`) anywhere in JSX.
+
+## Text Selection Utilities
+
+Dev Arcade also applies Tailwind's `selection` variant utilities directly on the `body` element to style highlighted text:
+
+```jsx
+<body className="selection:bg-magenta-hot selection:text-white">
+```
+
+This makes any text the user selects render with a `magenta-hot` background and white foreground — consistent with the neon accent palette — rather than the browser's default blue selection color. No config changes are needed; `selection:*` is a built-in Tailwind variant.
+
+<Note>
+  The compiled `assets/main.css` contains all Tailwind utility classes and custom CSS bundled together. If you are running Dev Arcade from source (not the pre-compiled output), you will have a `tailwind.config.js` and a `postcss.config.js` in the project root — those are the files to edit. Changes to `tailwind.config.js` take effect on the next build (`npm run build`) or automatically in the dev server (`npm run dev`).
+</Note>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Colors" icon="palette" href="/customization/colors">
+    Deep-dive into the six neon color tokens and how to swap the arcade palette.
+  </Card>
+  <Card title="Fonts" icon="font" href="/customization/fonts">
+    Learn about the three pixel typefaces and how to replace them.
+  </Card>
+</CardGroup>
