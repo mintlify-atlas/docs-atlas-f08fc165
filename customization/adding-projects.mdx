@@ -1,7 +1,7 @@
 ---
-title: "Add Your Own Projects to the Cartridge Inventory"
+title: "Add Your Own Projects to the Cartridge Inventory Grid"
 sidebarTitle: "Add Projects"
-description: "Edit the projects data array in the Projects page component to add, remove, or reorder project cartridges in the Level 3 grid."
+description: "Edit the projects data array in the Projects page component to add, remove, or reorder project cartridges displayed in the Level 3 grid."
 ---
 
 Every project card in the Level 3 grid is driven by a single plain JavaScript array defined at the top of the Projects page component. There is no external database or CMS — adding a new project cartridge is as simple as appending an object to that array, choosing the right filter category, and rebuilding the bundle. This page walks you through every field, explains the filter system, and shows you how to wire up the **LOAD GAME** and **VIEW SOURCE** hover buttons so they open real URLs.
@@ -13,7 +13,7 @@ Each entry in the projects array must conform to the following shape:
 ```typescript
 interface Project {
   id: number;
-  title: string;      // All-caps arcade style, e.g. "RETRO.DASH"
+  title: string;      // All-caps arcade style, e.g. "NEON.TASK"
   type: 'APP' | 'ECOMMERCE' | 'DASHBOARD' | 'SOCIAL'; // maps to filter buttons
   desc: string;
   tech: string;
@@ -29,25 +29,25 @@ interface Project {
     const projects: Project[] = [
       {
         id: 1,
-        title: 'RETRO.DASH',
-        type: 'DASHBOARD',
-        desc: 'Analytics dashboard with retro CRT display.',
-        tech: 'React, D3.js',
-        sampleData: false,
-      },
-      {
-        id: 2,
-        title: 'COIN.SHOP',
-        type: 'ECOMMERCE',
-        desc: 'Pixel art themed e-commerce storefront.',
-        tech: 'Next.js, Stripe',
+        title: 'NEON.TASK',
+        type: 'APP',
+        desc: 'A productivity app that gamifies your to-do list.',
+        tech: 'React, Node.js',
         sampleData: true,
       },
       {
+        id: 2,
+        title: 'CYBER.SHOP',
+        type: 'ECOMMERCE',
+        desc: 'Headless storefront with a retro aesthetic.',
+        tech: 'Next.js, Stripe',
+        sampleData: false,
+      },
+      {
         id: 3,
-        title: 'DATA.QUEST',
+        title: 'DATA.MATRIX',
         type: 'DASHBOARD',
-        desc: 'RPG-styled data visualization tool.',
+        desc: 'Real-time analytics visualization tool.',
         tech: 'Vue, D3.js',
         sampleData: true,
       },
@@ -190,7 +190,7 @@ If either URL is absent you may want to conditionally disable or hide the button
 </Note>
 
 <Tip>
-  Titles look best when written in all caps with dot notation — for example `RETRO.DASH`, `COIN.SHOP`, `PIXEL.CHAT` — to match the arcade cartridge aesthetic. Keep them short (one to two dot-separated words) so they fit cleanly inside the card's lime-neon heading.
+  Titles look best when written in all caps with dot notation — for example `NEON.TASK`, `CYBER.SHOP`, `PIXEL.CHAT` — to match the arcade cartridge aesthetic. Keep them short (one to two dot-separated words) so they fit cleanly inside the card's lime-neon heading.
 </Tip>
 
 ---

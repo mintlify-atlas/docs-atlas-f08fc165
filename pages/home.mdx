@@ -4,7 +4,7 @@ sidebarTitle: "Home"
 description: "The Dev Arcade home page is an animated character-select landing screen with a star-field background, scanlines, and an INSERT COIN ticker."
 ---
 
-The home page is the first thing visitors encounter when they load Dev Arcade. Themed as **"LEVEL 1: CHARACTER SELECT"**, it sets the tone for the entire portfolio with a full-screen arcade aesthetic — a procedurally animated star-field behind classic CRT scanline overlays, a bold hero section introducing the portfolio owner, and navigation links styled as arcade cabinet menu items. Everything is wrapped in `LevelLayout`, which plays an 800 ms loading animation before revealing the content, mimicking a real cartridge boot sequence.
+The home page is the first thing visitors encounter when they load Dev Arcade. Themed as **"LEVEL 1: START SCREEN"**, it sets the tone for the entire portfolio with a full-screen arcade aesthetic — a procedurally animated star-field behind classic CRT scanline overlays, a bold hero section introducing the portfolio owner, and navigation links styled as arcade cabinet menu items. Everything is wrapped in `LevelLayout`, which plays an 800 ms loading animation before revealing the content, mimicking a real cartridge boot sequence.
 
 ## Visual Design
 
@@ -29,11 +29,11 @@ The hero section sits at the center of the viewport and contains the arcade logo
 
 ## Level Structure & `LevelLayout`
 
-Every page in Dev Arcade — including the home page — is wrapped in the `LevelLayout` component. `LevelLayout` receives a `levelName` prop (here `"LEVEL 1: CHARACTER SELECT"`) and displays it as the screen's heading. Before the main content becomes visible, it runs an **800 ms boot animation** that mimics a game cartridge loading, complete with a brief progress flicker. This gives every page transition a consistent, polished feel.
+Every page in Dev Arcade — including the home page — is wrapped in the `LevelLayout` component. `LevelLayout` receives a `levelName` prop (here `"LEVEL 1: START SCREEN"`) and displays it as the screen's heading. Before the main content becomes visible, it runs an **800 ms boot animation** that mimics a game cartridge loading, complete with a brief progress flicker. This gives every page transition a consistent, polished feel.
 
 ```jsx
 // Simplified representation of how LevelLayout is used on the home page
-<LevelLayout levelName="LEVEL 1: CHARACTER SELECT">
+<LevelLayout levelName="LEVEL 1: START SCREEN">
   {/* Hero section, nav links, and marquee ticker live here */}
 </LevelLayout>
 ```

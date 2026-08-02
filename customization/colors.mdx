@@ -1,7 +1,7 @@
 ---
-title: "Customize Dev Arcade's Neon Color Palette"
+title: "Dev Arcade: Customize the Six Custom Neon Color Tokens"
 sidebarTitle: "Colors"
-description: "Dev Arcade uses six custom Tailwind color tokens. Learn what each one does and how to swap the arcade palette for your own brand colors."
+description: "Dev Arcade uses six custom Tailwind color tokens. Learn what each one does and how to swap the full arcade palette for your own brand colors."
 ---
 
 Dev Arcade's visual identity is built on six custom Tailwind color tokens that span the full dark-neon spectrum — from a near-black site background to electric purples, hot magentas, and a signature lime-neon green. Every component in the app references these tokens by name, which means the entire color scheme can be replaced by editing a single object in `tailwind.config.js`.
@@ -66,18 +66,10 @@ colors: {
 Dev Arcade styles the browser scrollbar to match the neon palette. This CSS lives in the global stylesheet (`main.css` / `index.css`) and uses hardcoded hex values rather than Tailwind utilities, because browser scrollbar pseudo-elements are not supported by Tailwind's utility pipeline.
 
 ```css
-::-webkit-scrollbar-thumb {
-  background: #b14cff; /* purple-electric */
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #ff3df0; /* magenta-hot */
-}
-
-::-webkit-scrollbar-track {
-  background: #07060d;              /* arcade */
-  border-left: 2px solid #1a0b2e;  /* purple-deep */
-}
+::-webkit-scrollbar { width: 12px; }
+::-webkit-scrollbar-track { background: #07060d; border-left: 2px solid #1a0b2e; }
+::-webkit-scrollbar-thumb { background: #b14cff; border: 2px solid #07060d; }
+::-webkit-scrollbar-thumb:hover { background: #ff3df0; }
 ```
 
 If you swap the palette, remember to update these hex values in the global CSS file to keep the scrollbar in sync with the rest of the UI.

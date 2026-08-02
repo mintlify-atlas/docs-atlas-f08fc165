@@ -43,15 +43,14 @@ The battle arena is built from four stacked layers that work together to tell th
     > Boss defeated. Load times decreased by 40%.
     ```
 
-    Each line is wrapped in a `motion.p` and animates from `opacity: 0` to `opacity: 1` at a staggered delay:
+    Each line is wrapped in a `motion.p` and animates from `opacity: 0` to `opacity: 1` at a staggered delay. Note that the first line (`> Battle initiated…`) is rendered as a plain `<p>` with no animation; only the four lines that follow use `motion.p`:
 
     | Line | Delay |
     |------|-------|
-    | Battle initiated… | 0.5 s |
-    | Player uses MICROSERVICES | 1.0 s |
-    | Boss attacks with SPAGHETTI CODE | 1.5 s |
-    | Player casts TYPESCRIPT MIGRATION | 2.0 s |
-    | Boss defeated. | 2.5 s |
+    | Player uses MICROSERVICES | 0.5 s |
+    | Boss attacks with SPAGHETTI CODE | 1.0 s |
+    | Player casts TYPESCRIPT MIGRATION | 1.5 s |
+    | Boss defeated. | 2.0 s |
   </Step>
   <Step title="Victory Screen">
     Once the HP bar animation completes, a victory overlay scales into view on top of the arena. It uses a Framer Motion scale entrance (`scale: 0.5 → 1`) and displays three elements:

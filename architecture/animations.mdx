@@ -1,33 +1,23 @@
 ---
 title: "Framer Motion Animation System in Dev Arcade"
 sidebarTitle: "Animations"
-description: "Dev Arcade uses Framer Motion 11 for page transitions, loading screens, hover effects, and SVG path animations. Learn how each layer works."
+description: "Dev Arcade uses Framer Motion 11.18.2 for page transitions, loading screens, hover effects, and SVG path animations. Learn how each animation layer works."
 ---
 
-Dev Arcade uses Framer Motion 11 throughout its component tree — from top-level route transitions that gate which page is visible, down to individual card hover effects that create a tactile 3D feel. The animation system is organized in layers: the router controls macro transitions between pages, the `LevelLayout` wrapper controls the per-page loading reveal, and individual components own their own entrance and interaction animations. A final layer of pure CSS effects handles ambient visuals like the star-field and scanlines that would be wasteful to drive with JavaScript.
+Dev Arcade uses Framer Motion 11.18.2 throughout its component tree — from top-level route transitions that gate which page is visible, down to individual card hover effects that create a tactile 3D feel. The animation system is organized in layers: the router controls macro transitions between pages, the `LevelLayout` wrapper controls the per-page loading reveal, and individual components own their own entrance and interaction animations. A final layer of pure CSS effects handles ambient visuals like the star-field and scanlines that would be wasteful to drive with JavaScript.
 
 ## Page Transition Layer
 
-At the router level, `AnimatePresence mode="wait"` wraps the `<Routes>` component. Every page's root element is a `motion.div` that declares `initial`, `animate`, and `exit` variants. The entering page fades up from a slight vertical offset, and the exiting page fades out in place.
+At the router level, `AnimatePresence mode="wait"` wraps the `<Routes>` component. The `LevelLayout` component handles every page's entrance and exit via its content-reveal `motion.div`, which declares `initial`, `animate`, and `exit` variants. The entering page fades up from a slight vertical offset once the 800ms loading screen completes, and the exiting page is handled by `AnimatePresence` before the incoming page mounts.
 
-```jsx
-<motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  exit={{ opacity: 0 }}
-  transition={{ duration: 0.4 }}
->
-  {/* page content */}
-</motion.div>
-```
-
-The `mode="wait"` setting on `AnimatePresence` ensures the exiting page's `exit` animation (fade to `opacity: 0`) completes in full before the incoming page begins its `initial → animate` sequence. This prevents two pages from being visible at the same time and keeps the transition feeling deliberate rather than rushed.
+The `mode="wait"` setting on `AnimatePresence` ensures the exiting page's animation completes in full before the incoming page begins its `initial → animate` sequence. This prevents two pages from being visible at the same time and keeps the transition feeling deliberate rather than rushed.
 
 ## LevelLayout Loading Screen
 
-Every page in the application is wrapped in the `LevelLayout` component, which plays an 800ms loading sequence before revealing its children. The loading screen displays a pulsing level name headline and an animated magenta progress bar that fills from left to right.
+Every page in the application is wrapped in the `LevelLayout` component (`Cc` in the compiled bundle, exported from `components/PageTransition.js`), which plays an 800ms loading sequence before revealing its children. The loading screen displays a pulsing level name headline and an animated magenta progress bar that fills from left to right over 0.7 seconds.
 
 ```jsx
+{/* Progress bar inside the loading screen */}
 <motion.div
   initial={{ width: '0%' }}
   animate={{ width: '100%' }}
@@ -36,7 +26,18 @@ Every page in the application is wrapped in the `LevelLayout` component, which p
 />
 ```
 
-After 800ms, `LevelLayout` unmounts the loading screen and mounts the page content. The content itself enters with the same `opacity: 0 → 1, y: 20 → 0` pattern used by the page transition layer, creating a consistent feel across all routes. The loading screen reinforces the arcade theme — each page load reads as a new "level" starting up.
+After 800ms, `LevelLayout` unmounts the loading screen and mounts the page content. The content itself enters with an `opacity: 0 → 1, y: 20 → 0` animation over 0.4 seconds, creating a consistent feel across all routes.
+
+```jsx
+{/* Content reveal after the 800ms loading screen */}
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.4 }}
+>
+  {children}
+</motion.div>
+```
 
 <Note>
   The 800ms duration is intentionally brief. It is long enough to register as a purposeful transition rather than a flash of unstyled content, but short enough that it does not feel like a real loading delay on fast connections.
@@ -44,7 +45,7 @@ After 800ms, `LevelLayout` unmounts the loading screen and mounts the page conte
 
 ## 3D Project Card Hover
 
-Project cards on the `/projects` route use Framer Motion's `whileHover` prop to apply a 3D tilt and scale effect. The `perspective` style value on the parent container provides the depth context that makes the rotation read as three-dimensional.
+Project cards on the `/projects` route use Framer Motion's `whileHover` prop to apply a 3D tilt and scale effect. The `perspective` style value on the card container provides the depth context that makes the rotation read as three-dimensional.
 
 ```jsx
 <motion.div
@@ -86,7 +87,7 @@ The Skills page features a constellation map rendered as an SVG. The connecting 
   initial={{ pathLength: 0, opacity: 0 }}
   animate={{ pathLength: 1, opacity: 0.3 }}
   transition={{ duration: 2, ease: 'easeInOut' }}
-  d="M 20% 30% L 50% 15% ..."
+  d="M 20% 30% L 50% 15% L 80% 40% L 55% 45% L 70% 75% L 35% 60% Z"
   stroke="#b14cff"
   fill="none"
 />
@@ -106,10 +107,10 @@ Some visual effects are implemented in pure CSS rather than Framer Motion. These
     A `radial-gradient` pattern of small dots is applied as a `background-image` and animated with a `stars` keyframe that scrolls `background-position` continuously over 100 seconds. The slow scroll speed makes the star field feel like deep space drifting rather than a looping tile.
   </Card>
   <Card title="Neon Glow" icon="lightbulb">
-    Tailwind's `drop-shadow` utilities apply colored box shadows to text and UI elements — for example, `drop-shadow-[0_0_8px_rgba(182,255,60,0.5)]` for a lime-green glow. This mimics the light bleed of neon signage and illuminated arcade cabinets without any JavaScript overhead.
+    CSS `drop-shadow` filters apply colored glows to text and UI elements — for example, `drop-shadow(0 0 8px rgba(182,255,60,0.5))` for a lime-green glow. This mimics the light bleed of neon signage and illuminated arcade cabinets without any JavaScript overhead.
   </Card>
   <Card title="Hot Magenta Accents" icon="palette">
-    The progress bar and various interactive highlights use a custom `bg-magenta-hot` Tailwind color, defined in the Tailwind config. Paired with the neon glow utilities, this creates the signature magenta-on-dark palette of classic arcade attract screens.
+    The progress bar and various interactive highlights use a custom `bg-magenta-hot` Tailwind color defined in the Tailwind config. Paired with the neon glow filters, this creates the signature magenta-on-dark palette of classic arcade attract screens.
   </Card>
 </CardGroup>
 

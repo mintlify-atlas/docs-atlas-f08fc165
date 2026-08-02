@@ -12,7 +12,7 @@ The application defines seven routes, each mapped to a dedicated React component
 
 | Path | Component | Level |
 |------|-----------|-------|
-| `/` | Home | Level 1: Character Select |
+| `/` | Home | Level 1: Start Screen |
 | `/about` | About | Level 2: Player Profile |
 | `/projects` | Projects | Level 3: Cartridge Inventory |
 | `/skills` | Skills | Level 4: Skill Tree |
@@ -80,6 +80,6 @@ Follow all four steps in order. Skipping any one of them will either break stati
     Copy any existing file from `pages/` (e.g., `pages/About.html`) and update the `window.__STATIC_PAGE_ROUTE__` value and both occurrences of the route path string to match your new path.
   </Step>
   <Step title="Register the entry point with Vite">
-    Add the new HTML file to `build.rollupOptions.input` in `vite.config.js` so that Vite includes it in the production build output. Without this step, the file will not be present in the `dist/` directory and static hosts will return a 404 for direct visits.
+    Add the new HTML file to `build.rollupOptions.input` in your Vite configuration so that Vite includes it in the production build output. Without this step, the file will not be present in the built output directory and static hosts will return a 404 for direct visits.
   </Step>
 </Steps>

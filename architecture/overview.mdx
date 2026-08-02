@@ -51,7 +51,7 @@ Static hosts — GitHub Pages, Netlify, Vercel's static adapter — serve files 
 The `pages/` HTML files solve this without any server configuration. Vite's `build.rollupOptions.input` is configured to include every HTML file as a build entry, so each route gets its own file in the output. When the host serves `pages/Projects.html`, the inline script redirects to `#/projects` and React Router takes over — no redirect rules, no `_redirects` file, no `vercel.json` rewrites needed.
 
 <Note>
-  All seven HTML files load the same `assets/main.js` bundle. The only difference between them is the `window.__STATIC_PAGE_ROUTE__` value in the inline script.
+  All eight HTML files — `index.html` plus the seven files in `pages/` — load the same `assets/main.js` bundle. The only difference between them is the `window.__STATIC_PAGE_ROUTE__` value in the inline script.
 </Note>
 
 ## Next Steps
